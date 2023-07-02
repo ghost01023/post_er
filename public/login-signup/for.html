@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form method="post" action="login-signup.html">
+  <input type="email" name="email" placeholder="email">
+  <input type="number" name="pin" placeholder="pin">
+  <input type="password" name="password" placeholder="password">
+  <button type="submit">submit!</button>
+</form>
+</body>
+<script>
+    const form = document.querySelector("form")
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    let data = new FormData(form);
+    console.log(...data);
+    let k = new Request("http://localhost:5000/feed-posts");
+  })
+</script>
+</html>

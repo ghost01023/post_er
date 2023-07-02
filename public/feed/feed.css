@@ -1,0 +1,20 @@
+.feed {
+    background-color: grey;
+    display: flex;
+    flex-flow: wrap column;
+    width: 80vw;
+    justify-content: center;
+    align-items: flex-start;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.post-card {
+    height: 20%;
+    background-color: #6d44b8;
+    padding: 1rem 1.5rem;
+}
+
+.post-card img {
+    width: 75%;
+}
