@@ -112,7 +112,7 @@ async function createUserFolder(name) {
             }
         })
     })
-    createUserPreference(name).then(res => {
+    createUserPreference(name).then(() => {
         console.log(name + "'s User Preferences Folder was Successfully Created!")
     })
     return true
@@ -170,19 +170,46 @@ async function createUserPreference(name) {
 //THE PASSWORD MATCHES. RETURNS TRUE, OTHERWISE FALSE
 
 async function CheckUser(email_username, password) {
-    const checkQuery = `SELECT * FROM profile WHERE (profile.username = "${email_username}" 
-OR profile.email = "${email_username}") AND profile.password = "${password}"`
-    return new Promise((resolve, reject) => database.query(checkQuery, (err, res) => {
-        if (err) {
-            reject(new Error())
-        } else {
-            console.log(res)
-            console.log("good going till now")
-            resolve(res)
-        }
-    })).catch(() => {
-        console.log("Error Occurred!")
+    const check_user_query = `SELECT * FROM profile WHERE (username = '${email_username}' 
+or email = '${email_username}') and password = '${password}'`
+    return new Promise((resolve) => {
+        database.query(check_user_query, (err, query_res) => {
+            console.log(query_res)
+            if (err) {
+                console.log("Couldn't fetch comparison details")
+            } else {
+                if (query_res.length === 1) {
+                    resolve(true)
+                } else {
+                    resolve(false)
+                }
+            }
+        })
     })
 }
 
-module.exports = { AddUser }
+//DELETES A USER FROM THE DATABASE ALONG WITH THEIR
+//POSTS AND PROFILE INFORMATION ALTOGETHER
+
+async function DeleteUser(email_username, password) {
+    const profileDeleteInstructions = `DELETE FROM profile WHERE 
+(profile.username = "${email_username}" OR profile.email = "${email_username}") 
+AND profile.password = "${password}"`;
+    console.log("checked!");
+    fs.rmdirSync((usersPath + email_username), (err) => {
+            if (err) {
+                console.log(err)
+            }
+        }
+    );
+    database.query(profileDeleteInstructions, (err) => {
+        if (err) {
+            console.log(err);
+            console.log('Error occurred during deletion')
+        } else {
+            console.log("Your profile was deleted successfully!");
+        }
+    })
+}
+
+module.exports = {AddUser, CheckUser, DeleteUser}

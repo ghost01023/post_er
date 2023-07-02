@@ -13,7 +13,7 @@ const mysql = require("mysql");
 //IMPORT CUSTOM MODULES
 /////////////////////////
 
-const {AddUser} = require("./funcs/make_user")
+const {AddUser} = require("./funcs/manage_user")
 const {usersPath, localPath, sessionPath} = require("./funcs/paths")
 const {GetFeedPosts} = require("./funcs/load-feed-posts")
 const {AuthenticateUser} = require("./funcs/authenticate_user")
@@ -36,14 +36,16 @@ app.listen(5000, () => {
 
 
 app.get(["/", "/signup", "/login"], (req, res) => {
-    if (req.cookies["seltzer"]) {
-        app.use(express.static(__dirname + "/public/feed"))
-        res.sendFile(__dirname + "/public/feed/feed.html");
-    } else {
-        console.log("Cookies Not Found!");
-        app.use(express.static(__dirname + "/public/login-signup"))
-        res.sendFile(__dirname + "/public/login-signup/login-signup.html");
-    }
+    PrivilegedUser(req).then(privilege => {
+        if (privilege === true) {
+            app.use(express.static(__dirname + "/public/feed"))
+            res.sendFile(__dirname + "/public/feed/feed.html");
+        } else {
+            console.log("Cookies Not Found!");
+            app.use(express.static(__dirname + "/public/login-signup"))
+            res.sendFile(__dirname + "/public/login-signup/login-signup.html");
+        }
+    })
 })
 
 
@@ -79,6 +81,15 @@ app.post("/login", upload.none(), async (req, res) => {
     //FEED WILL BE LOADED
 })
 
+
+//WILL DELETE USER COOKIE SESSION DATA FROM JSON
+//ALSO NEED TO ENABLE COOKIE CROSS CHECK IN THE FIRST PLACE
+
+app.post("/logout", (req, res) => {
+    console.log(req);
+    res.send("<h1>Logged you out!</h1>")
+})
+
 //CREATE FUNCTION TO CREATE USER FEED [also privileged action]
 // FOR SENDING TO THE CONSTRUCT PAGE
 //CONSTRUCT RANDOM GEN HASH COOKIE SEND IT TO USER
@@ -95,33 +106,12 @@ app.post("/login", upload.none(), async (req, res) => {
 //A VARIED FUNCTION THAT ADDS A NEW USER AND IS CALLED FROM THE SIGNUP
 //FORM POST METHOD
 
-//DELETES A USER FROM THE DATABASE ALONG WITH THEIR
-//POSTS AND PROFILE INFORMATION ALTOGETHER
 
-async function DeleteUser(email_username, password) {
-    const profileDeleteInstructions = `DELETE FROM profile WHERE 
-(profile.username = "${email_username}" OR profile.email = "${email_username}") 
-AND profile.password = "${password}"`;
-    console.log("checked!");
-    fs.rmdirSync((usersPath + email_username), (err) => {
-            if (err) {
-                console.log(err)
-            }
-        }
-    );
-    database.query(profileDeleteInstructions, (err) => {
-        if (err) {
-            console.log(err);
-            console.log('Error occurred during deletion')
-        } else {
-            console.log("Your profile was deleted successfully!");
-        }
-    })
-}
 
 //FUNCTION THAT RETURNS TRUE IF USER HAS REGISTERED PRIVILEGES
-//SO THAT HE CAN PERFORM ACTIONS SPECIFIC TO HIS PROFILE.
-//THESE ACTIONS INCLUDE:
+// [THROUGH COOKIE HASH STATE CHECK ONLY]
+// SO THAT HE CAN PERFORM ACTIONS SPECIFIC TO HIS PROFILE.
+// THESE ACTIONS INCLUDE:
 //1. LOADING FEED,
 //2. FOLLOWING AND UNFOLLOWING PEOPLE TO INDIRECTLY MODIFY HIS
 //   FOLLOWING JSON FILE
@@ -132,9 +122,28 @@ AND profile.password = "${password}"`;
 //6. EDITING HIS OWN PROFILE SUCH AS DISPLAY NAME (nickname?) ??
 //7. BEING ABLE TO SET PROFILE PICTURE
 
-const PrivilegedUser = (req) => {
-
-    return true
+const PrivilegedUser = async (req) => {
+    console.log("privileged user func called")
+    const {user, seltzer} = req.cookies
+    console.log(user + seltzer)
+    return new Promise((resolve) => {
+        fs.readFile((sessionPath + "/cookie_users.json"), (err, data) => {
+            if (err) {
+                resolve(false)
+            } else {
+                let data_json = JSON.parse(data.toString());
+                if (data_json[user]) {
+                    if (data_json[user] === seltzer) {
+                        resolve(true)
+                    } else {
+                        resolve(false)
+                    }
+                } else {
+                    resolve(false)
+                }
+            }
+        })
+    })
 }
 
 
@@ -188,9 +197,11 @@ app.get("/users/*", (req, res) => {
     let Query = req.url.includes("http://") ? req.url : "http://localhost:5000" + req.url;
     Query = Query.replaceAll("%20", " ");
     if (IfImageSearch(Query)) {
-        console.log(Query);
+        console.log("User has made an image fetch request...")
         fs.readFile(EndToLocal(Query), (err, content) => {
-            if (err) return err
+            if (err) {
+                console.log(err)
+            }
             res.end(content);
         })
     } else {

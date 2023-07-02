@@ -13,7 +13,7 @@ const GetFeedPosts = (req, res) => {
         return
     }
     console.log("and now feed posts are being called!")
-    res.send("Feed incoming...")
+    res.send({serverResp: "Feed incoming..."})
     // const Post = require(usersPath + currentUser + "/feed");
     //ACCESSES FEED JSON
     //FILE
