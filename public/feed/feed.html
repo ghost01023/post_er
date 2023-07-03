@@ -25,13 +25,15 @@
     </h2>
 </div>
 <div class="post-div">
-    <button type="button" class="post-button">POST!</button>
+    <button type="button" class="post-button">Hello</button>
     <h4 class="post-not-privy">You Cannot Post At this moment. Try Logging in again.</h4>
 </div>
 <div class="user-post">
-    <form method="POST" action="/upload">
+    <form method="POST" action="/upload" enctype="multipart/form-data">
         <h1>Select Image</h1>
-        <p>Enter Caption...</p>
+        <label for="post-file">Choose a File:
+            <input id="post-file" name="post-file" type="file">
+        </label>
         <button type="submit">POST</button>
     </form>
 </div>

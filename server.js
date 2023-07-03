@@ -8,6 +8,10 @@ app.use(bodyParser.urlencoded({extended: false}));
 const cookieParser = require("cookie-parser");
 app.use(cookieParser())
 const mysql = require("mysql");
+const path = require("path")
+
+/////////////MULTER STORAGE ENGINE
+
 
 /////////////////////////
 //IMPORT CUSTOM MODULES
@@ -18,6 +22,7 @@ const {usersPath, localPath, sessionPath} = require("./funcs/paths")
 const {GetFeedPosts} = require("./funcs/load-feed-posts")
 const {AuthenticateUser} = require("./funcs/authenticate_user")
 const {PrivilegedUser} = require("./funcs/check_privilege")
+const {POST_ER_EPOCH, Dates, getCurrentDate, Age} = require("./funcs/date_and_time")
 const database = mysql.createConnection({
     host: 'localhost', user: 'root', password: '', database: 'people_data'
 })
@@ -55,18 +60,70 @@ app.get("/feed-posts", GetFeedPosts)
 
 //POST METHOD FOR WHEN A USER UPLOADS THEIR POSTS
 
-app.post("/upload", (req, res) => {
+const UploadPost = (req, res) => {
     PrivilegedUser(req).then(privy => {
         if (privy) {
-            console.log("User has posting privileges")
-        } else {
-            console.log("User seems to have cleared cookies!")
-            res.redirect("/")
+            return req.file.buffer;
         }
+        if (!privy) {
+            res.send("Sorry, You are not Authorized to Post!")
+        }
+    }).then(image_data => {
+        fs.appendFileSync((usersPath + req.cookies.user + "/images/uploads_file.png"), (image_data), (err) => {
+            if (err) {
+                console.log("couldn't append image buffer data")
+            } else {
+                console.log("image successfully made!")
+            }
+        })
+    }).then(() => {
+        fs.readFile((usersPath + req.cookies.user + "/posts/posts.json"), (err, data) => {
+            if (err) {
+                fs.rm((usersPath + req.cookies.user + "/images/uploaded_file.png"), (err) => {
+                    if (err) {
+                        console.log("Failed Post Undo. Manual Adjustment Required.")
+                    } else {
+                        console.log("Reverted Post Image Directory Changes Back to Before Posting...")
+                    }
+                })
+            } else {
+                let data_json = JSON.parse(data.toString());
+                let current_date = getCurrentDate()
+                let { year, month, day, time } = current_date
+                const post_object = {
+                    link: "/images/uploaded_file.png",
+                    caption: "adding my first post!!!",
+                    date: `${year.toString()}-${month}-${day}`,
+                    time: time
+                }
+                console.log(post_object)
+                data_json.push(post_object)
+                console.log(data_json)
+                fs.writeFile((usersPath + req.cookies.user + "/posts/posts.json"), JSON.stringify(data_json), (err) => {
+                        if (err) {
+                            console.log("Couldn't add to posts.json after adding image post .png. Reverting File Changes.")
+                            fs.rm((usersPath + req.cookies.user + "/images/uploaded_file.png"), (err) => {
+                                if (err) {
+                                    console.log("Couldn't revert post image changes to before change." +
+                                        "Manual Adjustment Required.")
+                                } else {
+                                    console.log("Deleted post image due to problems..")
+                                }
+                            })
+                        } else {
+                            res.redirect("/")
+                            console.log("/posts.json file modified to reflect changes.")
+                        }
+                    }
+                )
+            }
+        })
     })
-    // app.use(express.static(__dirname + "/public/create-post"));
-    // res.sendFile(__dirname + "/public/create-post/create-post.html");
-})
+}
+
+app.post("/upload", upload.single("post-file"), UploadPost)
+// app.use(express.static(__dirname + "/public/create-post"));
+// res.sendFile(__dirname + "/public/create-post/create-post.html");
 
 //POST METHOD FOR A SIGN-UP FORM FOR USER
 
@@ -92,13 +149,13 @@ app.post("/login", upload.none(), async (req, res) => {
 })
 
 app.get("/privilege", (req, res) => {
-    PrivilegedUser(req).then(privy => {
-        if (privy) {
-            res.send("You are not the guy")
-        } else {
-            res.send("You are still not the guy")
-        }
-    })
+        PrivilegedUser(req).then(privy => {
+            if (privy) {
+                res.send({privy: true})
+            } else {
+                res.send({privy: false})
+            }
+        })
     }
     //     res.send(new Promise((resolve) => {
     //         PrivilegedUser(req).then(privy => {

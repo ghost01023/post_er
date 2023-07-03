@@ -5,17 +5,34 @@ const PostHeading = document.createElement("h1");
 const LogOutForm = document.querySelector("form");
 const PostButton = document.querySelector(".post-button");
 const PostDiv = document.querySelector(".user-post");
+const PostDivForm = document.querySelector(".user-post form")
 const PostNotPrivy = document.querySelector(".post-not-privy")
 
+let shown_post_div = false
+
 PostButton.addEventListener("click", () => {
-    fetch("/privilege").then(data => {
-        console.log(data)
-        if (data === true) {
-            PostDiv.style.visibility = "initial";
-        } else {
-            PostNotPrivy.style.visibility = "initial";
-        }
-    })
+    if (shown_post_div) {
+        PostDiv.style.visibility = "hidden";
+        shown_post_div = false;
+    } else {
+        fetch("/privilege").then(res => res.json()).then(data => {
+            console.log(data)
+            if (data.privy === true) {
+                PostDiv.style.visibility = "initial";
+                shown_post_div = true;
+            }
+        })
+    }
+})
+
+// PostDivForm.addEventListener("submit", (event) => {
+//     event.preventDefault();
+//     let formData = new FormData(PostDivForm);
+//     formData.sub
+// })
+
+document.querySelector(".user-post form #post-file").addEventListener("change", (event) => {
+    console.log('logged file blob')
 })
 
 LogOutForm.addEventListener("submit", (event) => {
@@ -26,6 +43,8 @@ LogOutForm.addEventListener("submit", (event) => {
         }
     })
 })
+
+
 //FUNCTION RUNS FOR FIRST TIME WHEN LOADING FEED PAGE,
 
 //RUNS AND RE-RUNS EACH TIME THE USER SCROLLS TO THE

@@ -10,6 +10,7 @@
     align-items: flex-start;
     margin-right: auto;
     margin-left: auto;
+    margin-top: 6rem;
 }
 
 .post-card {
@@ -22,8 +23,18 @@
     width: 75%;
 }
 
-.user-post form {
+.user-post {
     visibility: hidden;
+    display: flex;
+    flex-flow: wrap row;
+    width: 100%;
+    position: fixed;
+    bottom: 7rem;
+}
+
+.user-post form {
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .post-not-privy {
@@ -55,26 +66,24 @@
     font-family: "Brandon Grotesque Light", sans-serif;
     font-size: 2rem;
     padding: 0.5rem 1rem;
-    background-color: darkslategrey;
+    /*background-color: darkslategrey;*/
     color: white;
     transition: all 0.3s ease-in-out;
 }
 
 .post-button:hover, .log-out:hover {
     padding: 0.5rem 1.3rem;
-    color: antiquewhite;
+    /*color: antiquewhite;*/
     border-radius: 0.2rem;
 }
 
 .post-button {
+    background-color: transparent;
+    color: black;
+    background-image: url("/icons/plus.svg");
 }
 
 .log-out {
     background-color: orangered;
     color: white;
-}
-
-.post-button::after {
-    content: "";
-
 }
