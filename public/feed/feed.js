@@ -2,15 +2,29 @@
 
 // Feed.innerHTML = "Hello there";
 const PostHeading = document.createElement("h1");
-const LogOutBtn = document.querySelector(".log-out")
+const LogOutForm = document.querySelector("form");
+const PostButton = document.querySelector(".post-button");
+const PostDiv = document.querySelector(".user-post");
+const PostNotPrivy = document.querySelector(".post-not-privy")
 
-LogOutBtn.addEventListener("click", () => {
-    let sure = prompt("Do you really want to log out?")
-    if (sure) {
-        fetch("/", {
+PostButton.addEventListener("click", () => {
+    fetch("/privilege").then(data => {
+        console.log(data)
+        if (data === true) {
+            PostDiv.style.visibility = "initial";
+        } else {
+            PostNotPrivy.style.visibility = "initial";
+        }
+    })
+})
 
-        })
-    }
+LogOutForm.addEventListener("submit", (event) => {
+    event.preventDefault()
+    fetch("/rem-sesh").then(res => res.json()).then(logoutStatus => {
+        if (logoutStatus) {
+            LogOutForm.submit();
+        }
+    })
 })
 //FUNCTION RUNS FOR FIRST TIME WHEN LOADING FEED PAGE,
 
@@ -18,11 +32,10 @@ LogOutBtn.addEventListener("click", () => {
 //END OF HIS FEED, UNTIL (OF COURSE) HE REACHES THE
 //END OF ALL OF HIS FEED
 const LoadPosts = () => {
-    fetch("/feed-posts").then(res => {
-            console.log('The data is ' + res);
-            // ConstructPage(data)
-        }
-    )
+    fetch("/feed-posts").then(res => res.json()).then(data => {
+        console.log(data);
+    })
+    // ConstructPage(data)
 }
 LoadPosts()
 

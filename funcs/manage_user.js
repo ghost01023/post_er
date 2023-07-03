@@ -11,6 +11,7 @@ const database = mysql.createConnection({
 //A VARIED FUNCTION THAT ADDS A NEW USER AND IS CALLED FROM THE SIGNUP
 //FORM POST METHOD
 
+
 const AddUser = (username, email, password) => {
     const add_profile_instructions = (`INSERT INTO profile (email, username, password) VALUES ("${email}", "${username}", "${password}")`);
     database.query(add_profile_instructions, (err) => {

@@ -1,8 +1,11 @@
 .feed {
-    background-color: grey;
     display: flex;
     flex-flow: wrap column;
     width: 80vw;
+    border: 1px solid purple;
+    padding: 0.5rem 1rem;
+    text-align: center;
+    font-family: "Instagram Sans", sans-serif;
     justify-content: center;
     align-items: flex-start;
     margin-right: auto;
@@ -17,4 +20,61 @@
 
 .post-card img {
     width: 75%;
+}
+
+.user-post form {
+    visibility: hidden;
+}
+
+.post-not-privy {
+    visibility: hidden;
+}
+
+.post-div, .log-out-div {
+    display: flex;
+    flex-flow: wrap row;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    width: 100%;
+}
+
+
+.post-div {
+    bottom: 2rem;
+}
+.log-out-div {
+    top: 1rem;
+    justify-content: flex-end;
+    width: 95vw;
+}
+
+.post-button, .log-out {
+    border: 1px solid black;
+    border-radius: 0.125rem;
+    font-family: "Brandon Grotesque Light", sans-serif;
+    font-size: 2rem;
+    padding: 0.5rem 1rem;
+    background-color: darkslategrey;
+    color: white;
+    transition: all 0.3s ease-in-out;
+}
+
+.post-button:hover, .log-out:hover {
+    padding: 0.5rem 1.3rem;
+    color: antiquewhite;
+    border-radius: 0.2rem;
+}
+
+.post-button {
+}
+
+.log-out {
+    background-color: orangered;
+    color: white;
+}
+
+.post-button::after {
+    content: "";
+
 }

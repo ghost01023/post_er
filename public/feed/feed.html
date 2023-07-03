@@ -9,11 +9,31 @@
     <link rel="stylesheet" type="text/css" href="./feed.css">
 </head>
 <body>
-<button type="button" class="log-out">Log Out!</button>
-    <h2>this is your page after either logging in or having logged in earlier and not yet having cleared cookies</h2>
-<div class="feed"></div>
+<div class="log-out-div">
+    <form method="POST" action="/logout">
+        <button type="submit" class="log-out">Log Out</button>
+    </form>
+</div>
+
+<div class="feed">
+    <h2>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at efficitur diam, eu venenatis arcu. Praesent
+        efficitur id elit eget dapibus. Aliquam eu convallis mauris. In in finibus tellus. Proin luctus porttitor massa
+        at accumsan. Mauris sed justo pretium, lobortis libero ultricies, vestibulum lacus. Phasellus laoreet, nisi nec
+        maximus bibendum, est risus semper massa, eget imperdiet purus metus non erat. In hac habitasse platea dictumst.
+        Aliquam magna turpis, iaculis at vulputate in, commodo sit amet ligula.
+    </h2>
+</div>
+<div class="post-div">
+    <button type="button" class="post-button">POST!</button>
+    <h4 class="post-not-privy">You Cannot Post At this moment. Try Logging in again.</h4>
+</div>
 <div class="user-post">
-    <button type="button">POST!</button>
+    <form method="POST" action="/upload">
+        <h1>Select Image</h1>
+        <p>Enter Caption...</p>
+        <button type="submit">POST</button>
+    </form>
 </div>
 <script src="./feed.js" type="application/javascript"></script>
 </body>

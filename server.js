@@ -17,6 +17,7 @@ const {AddUser} = require("./funcs/manage_user")
 const {usersPath, localPath, sessionPath} = require("./funcs/paths")
 const {GetFeedPosts} = require("./funcs/load-feed-posts")
 const {AuthenticateUser} = require("./funcs/authenticate_user")
+const {PrivilegedUser} = require("./funcs/check_privilege")
 const database = mysql.createConnection({
     host: 'localhost', user: 'root', password: '', database: 'people_data'
 })
@@ -37,6 +38,7 @@ app.listen(5000, () => {
 
 app.get(["/", "/signup", "/login"], (req, res) => {
     PrivilegedUser(req).then(privilege => {
+        console.log(privilege)
         if (privilege === true) {
             app.use(express.static(__dirname + "/public/feed"))
             res.sendFile(__dirname + "/public/feed/feed.html");
@@ -53,9 +55,17 @@ app.get("/feed-posts", GetFeedPosts)
 
 //POST METHOD FOR WHEN A USER UPLOADS THEIR POSTS
 
-app.get("/upload", (req, res) => {
-    app.use(express.static(__dirname + "/public/create-post"));
-    res.sendFile(__dirname + "/public/create-post/create-post.html");
+app.post("/upload", (req, res) => {
+    PrivilegedUser(req).then(privy => {
+        if (privy) {
+            console.log("User has posting privileges")
+        } else {
+            console.log("User seems to have cleared cookies!")
+            res.redirect("/")
+        }
+    })
+    // app.use(express.static(__dirname + "/public/create-post"));
+    // res.sendFile(__dirname + "/public/create-post/create-post.html");
 })
 
 //POST METHOD FOR A SIGN-UP FORM FOR USER
@@ -81,70 +91,49 @@ app.post("/login", upload.none(), async (req, res) => {
     //FEED WILL BE LOADED
 })
 
+app.get("/privilege", (req, res) => {
+    PrivilegedUser(req).then(privy => {
+        if (privy) {
+            res.send("You are not the guy")
+        } else {
+            res.send("You are still not the guy")
+        }
+    })
+    }
+    //     res.send(new Promise((resolve) => {
+    //         PrivilegedUser(req).then(privy => {
+    //             if (privy) {
+    //                 resolve(true)
+    //             } else {
+    //                 resolve(false)
+    //             }
+    //         })
+    //     }).then(res => {
+    //         console.log(res)
+    //         console.log(typeof(res))
+    //         return res
+    //     }))
+    // }
+)
+
 
 //WILL DELETE USER COOKIE SESSION DATA FROM JSON
 //ALSO NEED TO ENABLE COOKIE CROSS CHECK IN THE FIRST PLACE
-
-app.post("/logout", (req, res) => {
-    console.log(req);
-    res.send("<h1>Logged you out!</h1>")
+app.get("/rem-sesh", (req, res) => {
+    // console.log(req);
+    console.log("Logout Post Method Called!")
+    // console.log(req.body)
+    DeleteCookies(req.cookies["user"])
+    console.log("Cleared your cookies here!")
+    res.send({
+        loggedOut: true
+    })
 })
 
-//CREATE FUNCTION TO CREATE USER FEED [also privileged action]
-// FOR SENDING TO THE CONSTRUCT PAGE
-//CONSTRUCT RANDOM GEN HASH COOKIE SEND IT TO USER
-//THIS COOKIE WILL BE USED TO VERIFY THE USER'S PRIVILEGES
-//WHENEVER HE LIKES, COMMENTS, POSTS, FOLLOWS ETC.
-//STORE DATA OF COOKIE HASHES INSIDE THE SESSION/COOKIE_USERS.JSON
-//EACH TIME PRIVILEGE ACTION REQUEST IS MADE, IT IS MADE WITH USER
-//NAME INTACT AND COOKIE IS ALSO SENT TO SERVER THAT CROSS-CHECKS
-//COOKIE AGAINST USERNAME IN SESSION/COOKIE_USERS.JSON AND IF FOUND TRUE,
-//LETS USER PERFORM ACTION AND MODIFIES HIS PROFILE FOLDER ACCORDINGLY
-// res.send("Your name was found!")
 
-
-//A VARIED FUNCTION THAT ADDS A NEW USER AND IS CALLED FROM THE SIGNUP
-//FORM POST METHOD
-
-
-
-//FUNCTION THAT RETURNS TRUE IF USER HAS REGISTERED PRIVILEGES
-// [THROUGH COOKIE HASH STATE CHECK ONLY]
-// SO THAT HE CAN PERFORM ACTIONS SPECIFIC TO HIS PROFILE.
-// THESE ACTIONS INCLUDE:
-//1. LOADING FEED,
-//2. FOLLOWING AND UNFOLLOWING PEOPLE TO INDIRECTLY MODIFY HIS
-//   FOLLOWING JSON FILE
-//3. POSTING AND DELETING POSTS TO INDIRECTLY MODIFY HIS
-//   POSTS JSON FILE
-//4. COMMENTING ON POSTS
-//5. LIKING POSTS
-//6. EDITING HIS OWN PROFILE SUCH AS DISPLAY NAME (nickname?) ??
-//7. BEING ABLE TO SET PROFILE PICTURE
-
-const PrivilegedUser = async (req) => {
-    console.log("privileged user func called")
-    const {user, seltzer} = req.cookies
-    console.log(user + seltzer)
-    return new Promise((resolve) => {
-        fs.readFile((sessionPath + "/cookie_users.json"), (err, data) => {
-            if (err) {
-                resolve(false)
-            } else {
-                let data_json = JSON.parse(data.toString());
-                if (data_json[user]) {
-                    if (data_json[user] === seltzer) {
-                        resolve(true)
-                    } else {
-                        resolve(false)
-                    }
-                } else {
-                    resolve(false)
-                }
-            }
-        })
-    })
-}
+app.post("/logout", (req, res) => {
+    res.redirect("/")
+})
 
 
 //EVALUATES WHETHER THE REQUEST IS AN IMAGE REQ
@@ -177,11 +166,16 @@ const EndToLocal = (url) => {
 //FUNCTION TO REMOVE SESSION COOKIES OF USER FORM USER_COOKIE.JSON
 const DeleteCookies = (email_username) => {
     fs.readFile((sessionPath + "/cookie_users.json"), (err, data) => {
+        console.log("Accessing the cookie_users.json")
         if (err) {
             console.log(err)
         } else {
             let data_json = JSON.parse(data.toString());
+            console.log(data_json)
+            console.log(email_username)
             delete data_json[email_username];
+            console.log(data_json)
+            console.log("Removed user!")
             fs.writeFile((sessionPath + "/cookie_users.json"), JSON.stringify(data_json), (err) => {
                 if (err) {
                     console.log(err)

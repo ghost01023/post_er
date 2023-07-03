@@ -27,12 +27,14 @@ signup.addEventListener("click", () => {
 let form = document.querySelector(".login form");
 form.addEventListener("submit", (e) => {
         e.preventDefault()
-        loginFunc().then(res => res.json).then(() => {
-                const button = document.querySelector(".login button")
-                button.style.background = 'blue';
-                button.innerHTML = 'Profile Not Found';
+        loginFunc().then(res => {
+                if (res) {
+                    const button = document.querySelector(".login button")
+                    button.style.background = 'blue';
+                    button.innerHTML = 'Profile Not Found';
+                }
             }
-         ).then((res) => console.log(res)).then(() => form.submit())
+        ).then((res) => console.log(res)).then(() => form.submit())
     }
 )
 
