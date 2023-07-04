@@ -4,3 +4,6 @@ const sessionPath = "C:/Users/Rosja Dostoyevsjky/Documents/Webstorm/Visual Studi
 
 
 module.exports = { usersPath, localPath, sessionPath }
+
+let str = "qqnoPq0FXaYQy1KWqn-UlDDDDr09h16tVia_RBbnz1Y2Zgzz2T.png";
+console.log(str.substring(0, 50))

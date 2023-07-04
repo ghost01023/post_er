@@ -1,8 +1,9 @@
 const fs = require("fs");
 const CookieHashCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890-_.~";
 
-const  { sessionPath } = require("./paths");
-const { CheckUser } = require("./manage_user")
+const {sessionPath} = require("./paths");
+const {CheckUser} = require("./manage_user")
+const {FindUserNameFromEmail} = require("./username_from_email");
 
 
 //AUTHENTICATES THROUGH THIS PROCESS:
@@ -25,7 +26,7 @@ const { CheckUser } = require("./manage_user")
 
 const AuthenticateUser = (req, res) => {
     console.log("Authentication called")
-    const email_username = req.body["email_username"];
+    let email_username = req.body["email_username"];
     const password = req.body["password"];
     if (!email_username || !password) {
         res.send({status: "Empty Fields"})
@@ -33,32 +34,38 @@ const AuthenticateUser = (req, res) => {
     }
     CheckUser(email_username, password)
         .then(user_exists => {
-        if (!user_exists) {
-            res.send("Your name was NOT found in the database. " + "Try again or <a href='#'>Create a new account</a>")
-        } else {
-            let randomHash = "";
-            for (let i = 0; i < 50; i++) {
-                randomHash += CookieHashCharacters[Math.floor(Math.random() * CookieHashCharacters.length)]
-            }
-            fs.readFile((sessionPath + "/cookie_users.json"), (err, string_cookie) => {
-                if (err) console.log("Session cookie data unavailable!"); else {
-                    let json_cookie_data = JSON.parse(string_cookie.toString());
-                    console.log("Cookie Data Present Beforehand in the File is " + JSON.stringify(json_cookie_data))
-                    json_cookie_data[email_username] = randomHash;
-                    fs.writeFile((sessionPath + "/cookie_users.json"), JSON.stringify(json_cookie_data), (err) => {
-                        if (err) console.log("Error writing to session cookie data file!")
-                        else {
-                            console.log("Log-in Successful...")
-                            res.cookie("seltzer", randomHash);
-                            res.cookie("user", email_username);
-                            console.log("Redirecting to /feed-posts")
-                            res.redirect("/")
+            if (!user_exists) {
+                res.send("Your name was NOT found in the database. " + "Try again or <a href='#'>Create a new account</a>")
+            } else {
+                FindUserNameFromEmail(email_username)
+                    .then(query_res => {
+                        if (query_res) {
+                            email_username = query_res
                         }
+                        let randomHash = "";
+                        for (let i = 0; i < 50; i++) {
+                            randomHash += CookieHashCharacters[Math.floor(Math.random() * CookieHashCharacters.length)]
+                        }
+                        fs.readFile((sessionPath + "/cookie_users.json"), (err, string_cookie) => {
+                            if (err) console.log("Session cookie data unavailable!"); else {
+                                let json_cookie_data = JSON.parse(string_cookie.toString());
+                                console.log("Cookie Data Present Beforehand in the File is " + JSON.stringify(json_cookie_data))
+                                json_cookie_data[email_username] = randomHash;
+                                fs.writeFile((sessionPath + "/cookie_users.json"), JSON.stringify(json_cookie_data), (err) => {
+                                    if (err) console.log("Error writing to session cookie data file!")
+                                    else {
+                                        console.log("Log-in Successful...")
+                                        res.cookie("seltzer", randomHash);
+                                        res.cookie("user", email_username);
+                                        console.log("Redirecting to /feed-posts")
+                                        res.redirect("/")
+                                    }
+                                })
+                            }
+                        })
                     })
-                }
-            })
-        }
-    })
+            }
+        })
 }
 
-module.exports = { AuthenticateUser }
+module.exports = {AuthenticateUser}

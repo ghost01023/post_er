@@ -31,9 +31,11 @@ PostButton.addEventListener("click", () => {
 //     formData.sub
 // })
 
-document.querySelector(".user-post form #post-file").addEventListener("change", (event) => {
-    console.log('logged file blob')
-})
+document.querySelector(".user-post form #post-file")
+    .addEventListener("change", (event) => {
+            console.log('logged file blob')
+        }
+    )
 
 LogOutForm.addEventListener("submit", (event) => {
     event.preventDefault()
@@ -52,11 +54,15 @@ LogOutForm.addEventListener("submit", (event) => {
 //END OF ALL OF HIS FEED
 const LoadPosts = () => {
     fetch("/feed-posts").then(res => res.json()).then(data => {
-        console.log(data);
+        ConstructPage(data)
+        // console.log(data);
     })
-    // ConstructPage(data)
 }
 LoadPosts()
+
+let para = document.querySelector("h2");
+
+para.innerHTML += document.cookie.substring(document.cookie.lastIndexOf("="), document.cookie.length)
 
 //FUNCTION TO PARSE RECEIVED JSON OF POST DATA
 
@@ -64,21 +70,24 @@ LoadPosts()
 //AND SETTING THEIR ATTRIBUTES AND IMAGE
 //LINKS
 const ConstructPage = (array) => {
+    console.log(array)
     const Feed = document.querySelector(".feed");
-    array.map(url => {
+    array.map(post => {
         const PostCard = document.createElement("div");
         PostCard.classList.add("post-card");
-        // console.log("Post Card Created")
-        // const PostHeading = document.createElement("h1");
-        // console.log("Post Heading created")
-        // let h1 = card.post;
-        // console.log("Post value is " + h1);
-        // PostHeading.innerText = h1.toString();
-        // console.log("Inner Text of heading set")
-        const PostImage = document.createElement("img");
+        console.log(post)
+        console.log("Post Card Created")
+        const PostHeading = document.createElement("h1");
+        console.log("Post Heading created")
+        PostHeading.innerText = post.caption;
+        console.log("Inner Text of heading set")
+        let PostImage = new Image()
+        PostImage.src = "http://localhost:5000/users/" + post.username + post.link;
+
         // console.log("url is " + url);
-        PostImage.src = url;
+        // "http://localhost:5000/users/" + post.username + "/posts" + post.link;
         PostCard.appendChild(PostImage);
+        PostCard.appendChild(PostHeading);
         // console.log("PostHeading appended to PostCard");
         Feed.appendChild(PostCard);
         // console.log("PostCard added to feed");

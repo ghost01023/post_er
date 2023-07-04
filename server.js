@@ -8,21 +8,19 @@ app.use(bodyParser.urlencoded({extended: false}));
 const cookieParser = require("cookie-parser");
 app.use(cookieParser())
 const mysql = require("mysql");
-const path = require("path")
-
-/////////////MULTER STORAGE ENGINE
 
 
 /////////////////////////
 //IMPORT CUSTOM MODULES
 /////////////////////////
 
-const {AddUser} = require("./funcs/manage_user")
+const {AddUser, DeleteUser} = require("./funcs/manage_user")
 const {usersPath, localPath, sessionPath} = require("./funcs/paths")
 const {GetFeedPosts} = require("./funcs/load-feed-posts")
 const {AuthenticateUser} = require("./funcs/authenticate_user")
 const {PrivilegedUser} = require("./funcs/check_privilege")
 const {POST_ER_EPOCH, Dates, getCurrentDate, Age} = require("./funcs/date_and_time")
+const {gen_image_name} = require("./funcs/picture_name")
 const database = mysql.createConnection({
     host: 'localhost', user: 'root', password: '', database: 'people_data'
 })
@@ -58,9 +56,23 @@ app.get(["/", "/signup", "/login"], (req, res) => {
 
 app.get("/feed-posts", GetFeedPosts)
 
+//SIMPLE FUNC TO GENERATE USER POST ID (7 CHARS LONG)
+const genPostId = () => {
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789-_";
+    let id = ""
+    for (let i = 0; i < 7; i++) {
+        id += chars[Math.floor(Math.random() * 38)]
+    }
+    return id
+}
+
 //POST METHOD FOR WHEN A USER UPLOADS THEIR POSTS
 
 const UploadPost = (req, res) => {
+    let post_caption = req.body["new-post-caption"]
+    if (post_caption.length === 0) {
+        post_caption = null;
+    }
     PrivilegedUser(req).then(privy => {
         if (privy) {
             return req.file.buffer;
@@ -69,17 +81,19 @@ const UploadPost = (req, res) => {
             res.send("Sorry, You are not Authorized to Post!")
         }
     }).then(image_data => {
-        fs.appendFileSync((usersPath + req.cookies.user + "/images/uploads_file.png"), (image_data), (err) => {
+        const image_name = gen_image_name()
+        fs.appendFileSync((usersPath + req.cookies.user + "/posts/images/" + image_name), (image_data), (err) => {
             if (err) {
                 console.log("couldn't append image buffer data")
             } else {
                 console.log("image successfully made!")
             }
         })
-    }).then(() => {
+        return image_name
+    }).then((image_name) => {
         fs.readFile((usersPath + req.cookies.user + "/posts/posts.json"), (err, data) => {
             if (err) {
-                fs.rm((usersPath + req.cookies.user + "/images/uploaded_file.png"), (err) => {
+                fs.rm((usersPath + req.cookies.user + "/posts/images/" + image_name), (err) => {
                     if (err) {
                         console.log("Failed Post Undo. Manual Adjustment Required.")
                     } else {
@@ -89,20 +103,21 @@ const UploadPost = (req, res) => {
             } else {
                 let data_json = JSON.parse(data.toString());
                 let current_date = getCurrentDate()
-                let { year, month, day, time } = current_date
+                let {year, month, day, time} = current_date
+                let post_id = genPostId()
                 const post_object = {
-                    link: "/images/uploaded_file.png",
-                    caption: "adding my first post!!!",
+                    id: post_id,
+                    username: req.cookies.user,
+                    link: "/images/" + image_name,
+                    caption: post_caption,
                     date: `${year.toString()}-${month}-${day}`,
                     time: time
                 }
-                console.log(post_object)
-                data_json.push(post_object)
-                console.log(data_json)
+                data_json.unshift(post_object)
                 fs.writeFile((usersPath + req.cookies.user + "/posts/posts.json"), JSON.stringify(data_json), (err) => {
                         if (err) {
                             console.log("Couldn't add to posts.json after adding image post .png. Reverting File Changes.")
-                            fs.rm((usersPath + req.cookies.user + "/images/uploaded_file.png"), (err) => {
+                            fs.rm((usersPath + req.cookies.user + "/posts/images/" + image_name), (err) => {
                                 if (err) {
                                     console.log("Couldn't revert post image changes to before change." +
                                         "Manual Adjustment Required.")
@@ -157,20 +172,6 @@ app.get("/privilege", (req, res) => {
             }
         })
     }
-    //     res.send(new Promise((resolve) => {
-    //         PrivilegedUser(req).then(privy => {
-    //             if (privy) {
-    //                 resolve(true)
-    //             } else {
-    //                 resolve(false)
-    //             }
-    //         })
-    //     }).then(res => {
-    //         console.log(res)
-    //         console.log(typeof(res))
-    //         return res
-    //     }))
-    // }
 )
 
 
@@ -195,8 +196,11 @@ app.post("/logout", (req, res) => {
 
 //EVALUATES WHETHER THE REQUEST IS AN IMAGE REQ
 const IfImageSearch = (url) => {
+    console.log("Checking if image search...")
     if (url.substring(url.length - 4, url.length) === ".png") {
+        console.log("Asking for some image...")
         if (url.substring(0, localPath.length) === localPath) {
+            console.log("Image Fetch Request...")
             return true
         }
     }
@@ -242,22 +246,89 @@ const DeleteCookies = (email_username) => {
     })
 }
 
+// app.get("/*", (req, res) => {
+//     res.send("Not Available.")
+// })
 
-//CATCH-ALL ROUTE
-app.get("/users/*", (req, res) => {
-    let Query = req.url.includes("http://") ? req.url : "http://localhost:5000" + req.url;
-    Query = Query.replaceAll("%20", " ");
-    if (IfImageSearch(Query)) {
-        console.log("User has made an image fetch request...")
-        fs.readFile(EndToLocal(Query), (err, content) => {
-            if (err) {
-                console.log(err)
-            }
-            res.end(content);
+
+//ROUTE TO SEND USER POSTS WHOLESALE WITH POSTS.JSON AND IMAGE LINKS
+//ETC ETC
+
+const getPostJson = (username, id) => {
+    const location = usersPath + username + "/posts/posts.json";
+    console.log("location is " + location)
+    return new Promise((resolve, reject) => {
+        fs.readFile(location, (err, data) => {
+            let data_json = JSON.parse(data.toString());
+            data_json.map(post => {
+                console.log("Post id is " + post.id);
+                console.log("ID is " + id)
+                if (post.id.toString().toLowerCase() === id.toString().toLowerCase()) {
+                    console.log("id matches up.")
+                    resolve(post)
+                }
+            })
+            reject()
         })
-    } else {
-        res.send("<h1>Error 404. Page not found!</h1>");
+    })
+}
+
+app.get("/users/*/posts/*", (req, res) => {
+    let url = req.url.split("/");
+    let username = url[2];
+    let post_link = url[4];
+    console.log("Username is " + username + " and post_link is " + post_link)
+    getPostJson(username, post_link).then(data => {
+        console.log("Post data is ");
+        console.log(data);
+        res.send(data)
+    }).catch(() => {
+        res.send("404. Not found.")
+    })
+})
+
+
+//ROUTE TO SEND IMAGE FILES THEMSELVES WHEREVER THEY ARE REQUESTED LIKE
+//EARLY VERSION OF MORE OPEN INSTAGRAM
+
+//FIRST WILDCARD IS USERNAME, THEN => REQUESTED_IMAGE_URL
+
+app.get("/users/*/images/*", (req, res) => {
+        const imgUrl = calculateImageUrl(req);
+        console.log("server side url of image is " + imgUrl)
+        return new Promise((resolve) => {
+            fs.access((imgUrl), fs.constants.F_OK, err => {
+                resolve(!err)
+            })
+        }).then((exists) => {
+            if (exists) {
+                console.log("File exists...")
+                res.sendFile(imgUrl)
+            } else {
+                console.log("Couldn't find file...")
+                res.send("Error 404. File not found!")
+            }
+        })
     }
+)
+
+
+const calculateImageUrl = (req) => {
+    if (req.url.includes(".png") || req.url.includes(".jpeg")) {
+        let spl = req.url.split("/");
+        let username = spl[2];
+        let imageLink = spl[4].replace("%20", " ");
+        return usersPath + username + "/posts/images/" + imageLink
+    }
+}
+
+//CATCH-ALL ROUTE(s)
+// app.get("/*", (req, res) => {
+//     res.redirect("/")
+// })
+
+app.get("/users/*", (req, res) => {
+    res.send("<h1>Error 404. User not found!</h1>");
 })
 
 

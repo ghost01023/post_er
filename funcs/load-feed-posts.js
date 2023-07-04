@@ -7,21 +7,14 @@ const {PrivilegedUser} = require("./check_privilege.js")
 const GetFeedPosts = (req, res) => {
     const email_username = req.cookies.user;
     const cookie_hash = req.cookies["seltzer"];
-    console.log(email_username + cookie_hash);
-    if (!email_username || !cookie_hash) {
-        // app.use(express.static(__dirname + "/public/login-signup"))
-        // res.sendFile((__dirname + "/public/login-signup/login-signup.html"), {headers: {
-        //     }})
-        res.send("<h1>Invalid Session</h1><h3>Try Refreshing the Page...</h3>")
-        console.log("Redirected because email_username or cookie_hash or both were" +
-            "not found")
-        return
-    }
+    console.log("Username is " + email_username + " and the Cookie Hash is " + cookie_hash);
     console.log("Sending First 2 Feed Posts As JSON...")
     PrivilegedUser(req).then(privy => {
-        if (privy) {
+        if (!privy) {
+            res.redirect("/")
+        } else if (privy) {
             return new Promise((resolve, reject) => {
-                fs.readFile((usersPath + email_username + "/following.json"), (err, data) => {
+                fs.readFile((usersPath + email_username + "/preferences/following.json"), (err, data) => {
                         if (err) {
                             res.send({
                                 statusCode: 403,
@@ -29,7 +22,7 @@ const GetFeedPosts = (req, res) => {
                             })
                         } else {
                             const data_json = JSON.parse(data.toString());
-                            console.log("Reaidng data.json")
+                            console.log("User Follows These Other Users...")
                             console.log(data_json)
                             resolve(data_json)
                         }
@@ -37,27 +30,32 @@ const GetFeedPosts = (req, res) => {
                 )
             })
         }
-    }).then(followers => {
-        // let first_twenty_posts = [];
-        //KEEP FILLING THE FINAL_TWENTY_POSTS ARRAY UNTIL IT IS OF SIZE 20, THEN SEND
-        // while (final_twenty_posts.length < 2) {
-        //     //COMPARE DATA VALUES (later)
-        //     final_twenty_posts.push(first_twenty_posts[final_twenty_posts.length])
-        // }
-        return followers.map(follower => {
-             return FetchNextPost(follower, 0)
-        })
+    }).then(followers => new Promise((resolve, reject) => {
+        let foll_data = []
+        let len = followers.length
+        followers.map((follower, index) =>
+            FetchNextPost(follower).then(data => {
+                foll_data.push(data)
+                if (index + 1 === len) {
+                    resolve(foll_data)
+                }
+            })
+        )
     }).then(posts => {
-        console.log("posts are ")
-        console.log(posts)
-    })
+        console.log(typeof (posts))
+        console.log("Fetched Two Posts Are...")
+        posts.map(post => {
+            console.log(post)
+        })
+        res.send(posts)
+    }))
 
-            // console.log("first twenty posts are ")
-            // console.log(first_twenty_posts)
+    // console.log("first twenty posts are ")
+    // console.log(first_twenty_posts)
 
-            // console.log("final twenty posts will be as this: ")
-            // console.log(final_twenty_posts)
-            // res.send('{"serverResp": "Feed incoming..."}')
+    // console.log("final twenty posts will be as this: ")
+    // console.log(final_twenty_posts)
+    // res.send('{"serverResp": "Feed incoming..."}')
     // const Post = require(usersPath + currentUser + "/feed");
     //ACCESSES FEED JSON
     //FILE
@@ -81,16 +79,17 @@ const GetFeedPosts = (req, res) => {
 }
 
 
-const FetchNextPost = (username, index) => {
-    return fs.readFile((usersPath + "/" + username + "/posts/posts.json"), (err, data) => {
+const FetchNextPost = async (username, index) => {
+    return new Promise((resolve, reject) => fs.readFile((usersPath + "/" + username + "/posts/posts.json"), (err, data) => {
         if (err) {
             console.log("Failed to fetch followed user " + username + " 's  post list from his json file")
         } else {
             let data_json = JSON.parse(data.toString())
-            console.log(data_json)
-            return data_json[index]
+            console.log(username + "'s posts are as follows: ")
+            console.log(data_json[0])
+            resolve(data_json[0])
         }
-    })
+    }))
 }
 
 

@@ -11,6 +11,7 @@ document.addEventListener("keydown", (event) => {
         }
     }
 })
+
 login.addEventListener("click", () => {
     if (!onLogin) {
         onLogin = true;
@@ -31,10 +32,16 @@ form.addEventListener("submit", (e) => {
                 if (res) {
                     const button = document.querySelector(".login button")
                     button.style.background = 'blue';
-                    button.innerHTML = 'Profile Not Found';
+                    button.innerHTML = 'Loading...';
+                    return res
                 }
-            }
-        ).then((res) => console.log(res)).then(() => form.submit())
+            }).then((res) => {
+                if (res) {
+                    form.submit()
+                } else {
+                    console.log("Failed Authentication...")
+                }
+        })
     }
 )
 

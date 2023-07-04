@@ -1,5 +1,3 @@
-// import fs from "fs";
-// import path from "path";
 const fs = require("fs");
 const path = require("path");
 const usersPath = "C:/Users/Rosja Dostoyevsjky/Documents/Webstorm/Visual Studio Code/POST-er/database/users/";
@@ -101,18 +99,6 @@ async function createUserFolder(name) {
         fs.rmdirSync(path.join(usersPath + name))
         return false
     }
-    fs.readFile((usersPath + name + "/posts/posts.json"), (err, json) => {
-        if (err) {
-            console.log("Could Not Read user/posts/posts.json File")
-        }
-        let post_file_json = JSON.parse(json.toString())
-        post_file_json.push({"second extended": "my_man_here now!!"});
-        fs.writeFile((usersPath + name + "/posts/posts.json"), JSON.stringify(post_file_json), (err) => {
-            if (err) {
-                console.log("Could Not Append to user/posts/posts.json File!");
-            }
-        })
-    })
     createUserPreference(name).then(() => {
         console.log(name + "'s User Preferences Folder was Successfully Created!")
     })
