@@ -11,8 +11,7 @@ const POST_ER_EPOCH = {
 }
 
 
-Number.prototype.isLeapYear = () => {
-    let val = parseInt(this);
+const IsLeapYear = (val) => {
     return (val % 100) ? val % 400 === 0 : val % 4 === 0
 }
 
@@ -35,11 +34,11 @@ class Dates {
         this.total_days = () => {
             let days = this.day - 1;
             for (let i = POST_ER_EPOCH.year; i < this.year; i++) {
-                days += i.isLeapYear() ? 366 : 365;
+                days += IsLeapYear(i) ? 366 : 365;
             }
             for (let i = POST_ER_EPOCH.month; i < this.month; i++) {
                 console.log(typeof (i))
-                days += i.num_of_days(i, this.year.isLeapYear())
+                days += num_of_days(i, IsLeapYear(i))
             }
             return days
         }
@@ -99,14 +98,14 @@ const total_days = (date) => {
     let split_date = date.split("-");
     let days = 0
     for (let i = 2023; i < parseInt(split_date[0]); i++) {
-        if (i.isLeapYear()) {
+        if (IsLeapYear(i)) {
             days += 366
         } else {
             days += 365
         }
     }
     for (let i = 1; i < parseInt(split_date[1]); i++) {
-        days += num_of_days(i, i.isLeapYear())
+        days += num_of_days(i, IsLeapYear(i))
     }
     for (let i = 1; i < parseInt(split_date[2]); i++) {
         days++
@@ -136,10 +135,5 @@ const seconds_to_time = (val) => {
     let sec = pre_min - (min * 60);
     return [hours, min, sec]
 }
-
-let k = 12;
-let b = 43;
-let dec = parseFloat(`${k}.${b}`);
-console.log(dec)
 
 module.exports = {POST_ER_EPOCH, Dates, getCurrentDate, Age, total_seconds, total_days, seconds_to_time}

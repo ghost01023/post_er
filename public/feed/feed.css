@@ -13,6 +13,11 @@
     margin-top: 6rem;
 }
 
+.feed-greeting {
+    margin-right: auto;
+    margin-left: auto;
+}
+
 .post-card {
     height: 20%;
     background-color: #6d44b8;

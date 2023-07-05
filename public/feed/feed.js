@@ -62,7 +62,7 @@ LoadPosts()
 
 let para = document.querySelector("h2");
 
-para.innerHTML += document.cookie.substring(document.cookie.lastIndexOf("="), document.cookie.length)
+para.innerHTML += document.cookie.substring(document.cookie.indexOf("=") + 1, document.cookie.indexOf(";"))
 
 //FUNCTION TO PARSE RECEIVED JSON OF POST DATA
 

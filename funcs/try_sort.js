@@ -44,23 +44,16 @@ const posts = [
     }
 ]
 
-// let latest = posts.sort((first, second) =>
-let post_time_link = []
-posts.map(post => {
-        post_time_link
-            .push({
-                id: post.id, age: parseFloat(`${total_days(post.date)}.${total_seconds(post.time)}`)
-            })
-    }
-)
-
-console.log(total_seconds([20, 4, 1]))
-// )
-
-post_time_link.sort((a, b) => a.age - b.age).map(post => {
-
-})
-
-console.log(post_time_link)
+const SortPostByLatest = (postArray) => {
+    return postArray.map(post => {
+            post.age = parseFloat(`${total_days(post.date)}.${total_seconds(post.time)}`);
+            return post
+        }
+    ).sort((a, b) => b.age - a.age).map(post => {
+        delete post.age;
+        return post
+    })
+}
 
 
+module.exports = {SortPostByLatest}

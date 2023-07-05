@@ -21,6 +21,7 @@ const {AuthenticateUser} = require("./funcs/authenticate_user")
 const {PrivilegedUser} = require("./funcs/check_privilege")
 const {POST_ER_EPOCH, Dates, getCurrentDate, Age} = require("./funcs/date_and_time")
 const {gen_image_name} = require("./funcs/picture_name")
+const {LoadPost} = require("./funcs/load-feed-posts")
 const database = mysql.createConnection({
     host: 'localhost', user: 'root', password: '', database: 'people_data'
 })
@@ -295,14 +296,12 @@ app.get("/users/*/posts/*", (req, res) => {
 
 app.get("/users/*/images/*", (req, res) => {
         const imgUrl = calculateImageUrl(req);
-        console.log("server side url of image is " + imgUrl)
         return new Promise((resolve) => {
             fs.access((imgUrl), fs.constants.F_OK, err => {
                 resolve(!err)
             })
         }).then((exists) => {
             if (exists) {
-                console.log("File exists...")
                 res.sendFile(imgUrl)
             } else {
                 console.log("Couldn't find file...")
