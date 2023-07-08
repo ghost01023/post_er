@@ -5,10 +5,13 @@ const PostHeading = document.createElement("h1");
 const LogOutForm = document.querySelector("form");
 const PostButton = document.querySelector(".post-button");
 const PostDiv = document.querySelector(".user-post");
+const Feed = document.querySelector(".feed");
 const PostDivForm = document.querySelector(".user-post form")
 const PostNotPrivy = document.querySelector(".post-not-privy")
 
 let shown_post_div = false
+const Loading = document.querySelector(".loading")
+// document.querySelector(".feed").innerHTML = "<div>Loading Posts...Please Wait...</div>"
 
 PostButton.addEventListener("click", () => {
     if (shown_post_div) {
@@ -54,6 +57,7 @@ LogOutForm.addEventListener("submit", (event) => {
 //END OF ALL OF HIS FEED
 const LoadPosts = () => {
     fetch("/feed-posts").then(res => res.json()).then(data => {
+        Feed.removeChild(Loading)
         ConstructPage(data)
         // console.log(data);
     })
@@ -71,7 +75,6 @@ para.innerHTML += document.cookie.substring(document.cookie.indexOf("=") + 1, do
 //LINKS
 const ConstructPage = (array) => {
     console.log(array)
-    const Feed = document.querySelector(".feed");
     array.map(post => {
         const PostCard = document.createElement("div");
         PostCard.classList.add("post-card");

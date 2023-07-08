@@ -16,12 +16,12 @@ const mysql = require("mysql");
 
 const {AddUser, DeleteUser} = require("./funcs/manage_user")
 const {usersPath, localPath, sessionPath} = require("./funcs/paths")
-const {GetFeedPosts} = require("./funcs/load-feed-posts")
+const {GetFeedPosts} = require("./funcs/final_try_load")
 const {AuthenticateUser} = require("./funcs/authenticate_user")
 const {PrivilegedUser} = require("./funcs/check_privilege")
-const {POST_ER_EPOCH, Dates, getCurrentDate, Age} = require("./funcs/date_and_time")
+const { getCurrentDate } = require("./funcs/date_and_time")
 const {gen_image_name} = require("./funcs/picture_name")
-const {LoadPost} = require("./funcs/load-feed-posts")
+// const {LoadPost} = require("./funcs/try_load_feed_posts")
 const database = mysql.createConnection({
     host: 'localhost', user: 'root', password: '', database: 'people_data'
 })
@@ -304,7 +304,7 @@ app.get("/users/*/images/*", (req, res) => {
             if (exists) {
                 res.sendFile(imgUrl)
             } else {
-                console.log("Couldn't find file...")
+                console.log("Couldn't find file..." + imgUrl)
                 res.send("Error 404. File not found!")
             }
         })
@@ -332,3 +332,27 @@ app.get("/users/*", (req, res) => {
 
 
 module.exports = {database, usersPath}
+
+
+// proper request and response to login form from login-signup.html [DONE]
+// |
+// |-----as in, send cookie with hash [DONE]
+// |
+// |-----request user_feed after cookie has been received [DONE]
+// |
+// |--------send user_feed (in raw form for right now) [DONE]
+//
+//
+// Redesign the end_to_local and local_to_end functions as needed for image fetches
+// and also modify the ifImageSearch func to make it more versatile
+// and more suited to the current database structuring of the new posts
+// [ABANDONED. CHANGED  [RAW FUNC BODY INSTEAD. THE ETL AND LTC FUNC(S) THEMSELVES
+// WERE NOT VERSATILE ENOUGH TO SUIT ENOUGH NEEDS TO JUSTIFY THEIR EXISTENCE] [DONE]
+//
+// also, figure out the proper composition of a post and how the data will be stored [DONE]
+//
+// also figure out how to extract date from posts for comparison -- lly, create function that
+// sorts through posts [DONE]
+// also, structure all profile folders in ONE PROPER MANNER so that every user is on the same page
+// [MOSTLY DONE IN A HALFWAY-DECENT MANNER]
+
