@@ -8,10 +8,19 @@ const PostDiv = document.querySelector(".user-post");
 const Feed = document.querySelector(".feed");
 const PostDivForm = document.querySelector(".user-post form")
 const PostNotPrivy = document.querySelector(".post-not-privy")
+const LoadMorePostBtn = document.querySelector(".load-more-posts")
 
 let shown_post_div = false
 const Loading = document.querySelector(".loading")
 // document.querySelector(".feed").innerHTML = "<div>Loading Posts...Please Wait...</div>"
+
+LoadMorePostBtn.addEventListener("click", () => {
+    fetch("/more-feed-posts").then(res => res.json()).then(data => {
+        console.log("New Posts are now...")
+        ConstructPage(data)
+        console.log(data)
+    })
+})
 
 PostButton.addEventListener("click", () => {
     if (shown_post_div) {
@@ -76,6 +85,12 @@ para.innerHTML += document.cookie.substring(document.cookie.indexOf("=") + 1, do
 const ConstructPage = (array) => {
     console.log(array)
     array.map(post => {
+        if (post.end) {
+            let End = document.createElement("h2")
+            End.innerHTML = "You have reached the end of your feed."
+            Feed.appendChild(End)
+            return
+        }
         const PostCard = document.createElement("div");
         PostCard.classList.add("post-card");
         console.log(post)
@@ -86,7 +101,6 @@ const ConstructPage = (array) => {
         console.log("Inner Text of heading set")
         let PostImage = new Image()
         PostImage.src = "http://localhost:5000/users/" + post.username + post.link;
-
         // console.log("url is " + url);
         // "http://localhost:5000/users/" + post.username + "/posts" + post.link;
         PostCard.appendChild(PostImage);

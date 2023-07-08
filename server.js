@@ -16,7 +16,7 @@ const mysql = require("mysql");
 
 const {AddUser, DeleteUser} = require("./funcs/manage_user")
 const {usersPath, localPath, sessionPath} = require("./funcs/paths")
-const {GetFeedPosts} = require("./funcs/final_try_load")
+const {GetFeedPosts, MoreFeedPosts} = require("./funcs/final_try_load")
 const {AuthenticateUser} = require("./funcs/authenticate_user")
 const {PrivilegedUser} = require("./funcs/check_privilege")
 const { getCurrentDate } = require("./funcs/date_and_time")
@@ -56,6 +56,8 @@ app.get(["/", "/signup", "/login"], (req, res) => {
 
 
 app.get("/feed-posts", GetFeedPosts)
+
+app.get("/more-feed-posts", MoreFeedPosts)
 
 //SIMPLE FUNC TO GENERATE USER POST ID (7 CHARS LONG)
 const genPostId = () => {
