@@ -16,7 +16,6 @@ const Loading = document.querySelector(".loading")
 
 LoadMorePostBtn.addEventListener("click", () => {
     fetch("/more-feed-posts").then(res => res.json()).then(data => {
-        console.log("New Posts are now...")
         ConstructPage(data)
         console.log(data)
     })
@@ -45,7 +44,6 @@ PostButton.addEventListener("click", () => {
 
 document.querySelector(".user-post form #post-file")
     .addEventListener("change", (event) => {
-            console.log('logged file blob')
         }
     )
 
@@ -85,6 +83,7 @@ para.innerHTML += document.cookie.substring(document.cookie.indexOf("=") + 1, do
 const ConstructPage = (array) => {
     console.log(array)
     array.map(post => {
+        console.log(post)
         if (post.end) {
             let End = document.createElement("h2")
             End.innerHTML = "You have reached the end of your feed."
@@ -93,12 +92,8 @@ const ConstructPage = (array) => {
         }
         const PostCard = document.createElement("div");
         PostCard.classList.add("post-card");
-        console.log(post)
-        console.log("Post Card Created")
         const PostHeading = document.createElement("h1");
-        console.log("Post Heading created")
         PostHeading.innerText = post.caption;
-        console.log("Inner Text of heading set")
         let PostImage = new Image()
         PostImage.src = "http://localhost:5000/users/" + post.username + post.link;
         // console.log("url is " + url);

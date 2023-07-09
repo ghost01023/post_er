@@ -1,11 +1,13 @@
 const fs = require("fs");
 const path = require("path");
-const usersPath = "C:/Users/Rosja Dostoyevsjky/Documents/Webstorm/Visual Studio Code/POST-er/database/users/";
+const usersPath = "C:/Users/Rosja Dostoyevsjky/Documents/Webstorm/Visual Studio Code/database/users/";
 const mysql = require("mysql");
 
 const database = mysql.createConnection({
     host: 'localhost', user: 'root', password: '', database: 'people_data'
 })
+
+const {FindUsernameFromEmail, FindUserNameFromEmail} = require("./username_from_email")
 //A VARIED FUNCTION THAT ADDS A NEW USER AND IS CALLED FROM THE SIGNUP
 //FORM POST METHOD
 
@@ -178,24 +180,25 @@ or email = '${email_username}') and password = '${password}'`
 //DELETES A USER FROM THE DATABASE ALONG WITH THEIR
 //POSTS AND PROFILE INFORMATION ALTOGETHER
 
-async function DeleteUser(email_username, password) {
+function DeleteUser(email_username, password) {
     const profileDeleteInstructions = `DELETE FROM profile WHERE 
 (profile.username = "${email_username}" OR profile.email = "${email_username}") 
 AND profile.password = "${password}"`;
-    console.log("checked!");
-    fs.rmdirSync((usersPath + email_username), (err) => {
-            if (err) {
-                console.log(err)
+    FindUserNameFromEmail(email_username).then((username) => {
+        fs.rmdir((usersPath + username), (err) => {
+                if (err) {
+                    console.log(err)
+                }
             }
-        }
-    );
-    database.query(profileDeleteInstructions, (err) => {
-        if (err) {
-            console.log(err);
-            console.log('Error occurred during deletion')
-        } else {
-            console.log("Your profile was deleted successfully!");
-        }
+        );
+        database.query(profileDeleteInstructions, (err) => {
+            if (err) {
+                console.log(err);
+                console.log('Error occurred during deletion')
+            } else {
+                console.log("Your profile was deleted successfully!");
+            }
+        })
     })
 }
 

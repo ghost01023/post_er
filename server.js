@@ -16,7 +16,7 @@ const mysql = require("mysql");
 
 const {AddUser, DeleteUser} = require("./funcs/manage_user")
 const {usersPath, localPath, sessionPath} = require("./funcs/paths")
-const {GetFeedPosts, MoreFeedPosts} = require("./funcs/final_try_load")
+const {GetFeedPosts, MoreFeedPosts} = require("./funcs/finish_load")
 const {AuthenticateUser} = require("./funcs/authenticate_user")
 const {PrivilegedUser} = require("./funcs/check_privilege")
 const { getCurrentDate } = require("./funcs/date_and_time")
