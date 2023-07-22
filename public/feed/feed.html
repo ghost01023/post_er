@@ -9,32 +9,67 @@
     <link rel="stylesheet" type="text/css" href="./feed.css">
 </head>
 <body>
-<div class="log-out-div">
-    <form method="POST" action="/logout">
-        <button type="submit" class="log-out">Log Out</button>
-    </form>
-</div>
-<div class="search-users">
+<div class="feed-page">
+    <div class="top-bar">
+        <div class="search-users">
+            <form class="search-user-form" method="POST" action="/user-search">
+                <label for="search-users">
+                    <input id="search-users" name="user-search-query" type="search" placeholder="Search for Users...">
+                </label>
+            </form>
+            <div class="fetched-users">
 
+            </div>
+            <div class="chat">
+                <button class="chat-access">
+                    CHAT
+                </button>
+            </div>
+        </div>
+
+    </div>
+    <div class="feed">
+        <h2 class="feed-greeting">
+            Hello,&nbsp
+        </h2>
+        <div class="loading">
+            Fetching Posts...
+            Please Wait...
+        </div>
+    </div>
+    <div class="view-user-info">
+        <div class="show-profile-info"></div>
+        <div class="user-info">
+            <p>
+                Show User Profile Info and Settings Here
+            </p>
+            <div class="log-out-div">
+                <form class="log-out-form" method="POST" action="/logout">
+                    <button type="submit" class="log-out">Log Out</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
-<div class="feed">
-    <h2 class="feed-greeting">
-        Hello,&nbsp
-    </h2>
-    <div class="loading">
-        Fetching Posts...
-        Please Wait...
+<div class="chat-div">
+    <label for="search-chat-user">
+        <input id="search-chat-user" type="search" placeholder="Search User...">
+    </label>
+    <span class="close-chat-list">X</span>
+    <div class="chat-list">
+        <p>Your Chat List is Empty</p>
     </div>
 </div>
 <div class="post-div">
-    <button type="button" class="post-button">Hello</button>
+    <button type="button" class="post-button">POST</button>
     <h4 class="post-not-privy">You Cannot Post At this moment. Try Logging in again.</h4>
 </div>
 <div class="user-post">
     <form method="POST" action="/upload" enctype="multipart/form-data">
         <h1>Select Image</h1>
         <label for="post-caption">
-            <input type="text" name="new-post-caption" id="post-caption" class="new-post-caption" placeholder="What's on your mind?">
+            <input type="text" name="new-post-caption" id="post-caption" class="new-post-caption"
+                   placeholder="What's on your mind?">
         </label>
         <label for="post-file">Choose a File:
             <input id="post-file" name="post-file" type="file">

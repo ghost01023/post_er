@@ -19,7 +19,7 @@ const {usersPath, localPath, sessionPath} = require("./funcs/paths")
 const {GetFeedPosts, MoreFeedPosts} = require("./funcs/finish_load")
 const {AuthenticateUser} = require("./funcs/authenticate_user")
 const {PrivilegedUser} = require("./funcs/check_privilege")
-const { getCurrentDate } = require("./funcs/date_and_time")
+const {getCurrentDate} = require("./funcs/date_and_time")
 const {gen_image_name} = require("./funcs/picture_name")
 // const {LoadPost} = require("./funcs/try_load_feed_posts")
 const database = mysql.createConnection({
@@ -52,6 +52,31 @@ app.get(["/", "/signup", "/login"], (req, res) => {
             res.sendFile(__dirname + "/public/login-signup/login-signup.html");
         }
     })
+})
+
+
+///METHOD THAT ACCEPTS USER SEARCH CHARS AND RESOLVES USERNAMES AND SENDS THEM BACK
+///WHERE THEY ARE RENDERED ON THE PAGE [10 AT A TIME]
+
+app.post("/user-search", upload.none(), (req, res) => {
+    let query = req.body["user-search-query"].toLowerCase()
+    console.log("user search request made for " + query)
+    const SearchQuery = `SELECT username FROM profile WHERE username LIKE '%${query}%' LIMIT 5`
+    return new Promise((resolve) => {
+        database.query(SearchQuery, (err, queryRes) => {
+            console.log("Queried the database")
+            if (err) {
+                res.send("Error fetching users.")
+            } else {
+                console.log(queryRes)
+                resolve(queryRes)
+            }
+        })
+    }).then((resp => {
+        console.log("Database sent back ")
+        console.log(resp)
+        res.send(resp)
+    }))
 })
 
 
@@ -192,6 +217,36 @@ app.get("/rem-sesh", (req, res) => {
 })
 
 
+const { FetchChat } = require("./funcs/fetch_chat")
+
+
+app.get("/chats", (req, res) => {
+    const username = req.cookies.user
+    console.log(username)
+    PrivilegedUser(req).then((privy) => {
+        if (privy) {
+            fs.readFile((usersPath + username + "/chat/chat_list.json"), (err, data) => {
+                if (err) {
+                    console.log("Couldn't open chat_list.json for commie")
+                } else {
+                    let dataJson = JSON.parse(data.toString())
+                    const totalChats = dataJson.length
+                    let chats = {}
+                    for (let i = 0; i < totalChats; i++) {
+                        FetchChat(username, dataJson[i]).then(data => {
+                            chats[dataJson[i]] = data
+                            if (totalChats === i + 1) {
+                                res.send(chats)
+                            }
+                        })
+                    }
+                }
+            })
+        }
+    })
+})
+
+
 app.post("/logout", (req, res) => {
     res.redirect("/")
 })
@@ -323,15 +378,47 @@ const calculateImageUrl = (req) => {
     }
 }
 
+
+app.get("/users/*/profile.jpg", (req, res) => {
+    res.sendFile((usersPath + req.cookies.user + "/preferences/profile.jpg"))
+})
+
 //CATCH-ALL ROUTE(s)
 // app.get("/*", (req, res) => {
 //     res.redirect("/")
 // })
 
 app.get("/users/*", (req, res) => {
-    res.send("<h1>Error 404. User not found!</h1>");
+    console.log("Searched for user profile")
+    const username = req.url.substring(req.url.lastIndexOf("/") + 1, req.url.length)
+    fs.readFile((usersPath + username + "/posts/posts.json"), (err, data) => {
+        if (!err) {
+            // res.send("You searched for " + username + " who exists")
+            fs.readFile(__dirname + "/public/users/user.js", (err, data) => {
+                let str = data.toString()
+                // str = str.replace("missing_user_to_fetch", username)
+                fs.writeFile(__dirname + "/public/users/user.js", str, (err) => {
+                    if (err) {
+                        console.log("Failure while writing const username to js file")
+                    } else {
+                        console.log("Sending user profile files...")
+                        app.use(express.static(__dirname + "/public/users"))
+                        res.sendFile(__dirname + "/public/users/user.html")
+                    }
+                })
+            })
+        }
+        // else if (err.code === "ENOENT") {
+        //     res.send("That User Does Not Exist")
+        // }
+    })
 })
 
+
+app.get("/user_details/*", (req, res) => {
+    const user = req.url.substring(req.url.lastIndexOf("/"), -1)
+    res.send("You searched for " + user)
+})
 
 module.exports = {database, usersPath}
 

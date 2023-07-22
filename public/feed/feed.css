@@ -1,9 +1,91 @@
+.feed-page {
+    display: grid;
+    grid-template-columns: 2fr 6fr 2fr;
+    transition: filter 0.2s ease-in-out;
+}
+
+/*.top-bar {*/
+/*    display: grid;*/
+/*    grid-template-columns: 4fr 1fr;*/
+/*}*/
+
+.close-chat-list:hover {
+    cursor: default;
+}
+
+.search-users {
+    position: fixed;
+    top: 5%;
+    display: grid;
+    grid-template-rows: 3fr 12fr 2fr;
+}
+
+.chat-access {
+    font-size: 2rem;
+    padding: 0.6rem 1rem;
+    border: 2px solid black;
+    border-radius: 0.125rem;
+    box-shadow: 3px 2px grey;
+    transition: all 0.2s ease-in-out;
+}
+
+.chat-access:hover {
+    box-shadow: 2px 1px grey;
+}
+
+.chat-access:active {
+    box-shadow: 1px 0 grey;
+}
+
+.chat-div {
+    position: fixed;
+    z-index: 1000;
+    top: 5%;
+    left: 20%;
+    visibility: hidden
+}
+
+.close-chat-list {
+    padding: 0.5rem;
+    background-color: white;
+}
+
+.fetched-users {
+    font-size: 1.5rem;
+}
+
+.search-user-form {
+    font-family: "Instagram Sans", sans-serif;
+}
+
+#search-users {
+    font-size: 1.5rem;
+}
+
+.search-user-form input {
+    box-sizing: border-box;
+}
+
+.show-profile-info {
+    border-radius: 1.25rem;
+    background-image: url("http://localhost:5000/users/eleanor/images/dsLwZpQwnPQxSvLflXxeixAtgNcLkiuvKjEilOTrBxOxtNOgPu.png");
+    width: 3rem;
+    height: 3rem;
+}
+
+.user-info {
+    display: grid;
+    visibility: hidden;
+    position: fixed;
+    top: 20%;
+    right: 0;
+}
+
 .feed {
     display: flex;
-    flex-flow: wrap column;
-    width: 80vw;
+    flex-flow: wrap row;
     border: 1px solid purple;
-    padding: 0.5rem 1rem;
+    /*padding: 0.5rem 1rem;*/
     text-align: center;
     font-family: "Instagram Sans", sans-serif;
     justify-content: center;
@@ -19,13 +101,14 @@
 }
 
 .post-card {
-    height: 20%;
-    background-color: #6d44b8;
+    background-color: #F8F3D4;
     padding: 1rem 1.5rem;
+    box-sizing: border-box;
+    width: 100%;
 }
 
 .post-card img {
-    width: 75%;
+    width: 85%;
 }
 
 .user-post {
@@ -46,7 +129,7 @@
     visibility: hidden;
 }
 
-.post-div, .log-out-div {
+.post-div {
     display: flex;
     flex-flow: wrap row;
     justify-content: center;
@@ -57,12 +140,17 @@
 
 
 .post-div {
-    bottom: 2rem;
+    bottom: 1rem;
 }
 .log-out-div {
+    display: inline;
     top: 1rem;
-    justify-content: flex-end;
-    width: 95vw;
+    box-sizing: content-box;
+    right: 2rem;
+}
+
+.log-out-div form {
+    display: inline;
 }
 
 .post-button, .log-out {
@@ -83,7 +171,7 @@
 }
 
 .post-button {
-    background-color: transparent;
+    background-color: wheat;
     color: black;
     background-image: url("/icons/plus.svg");
 }

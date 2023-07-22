@@ -2,7 +2,7 @@
 
 // Feed.innerHTML = "Hello there";
 const PostHeading = document.createElement("h1");
-const LogOutForm = document.querySelector("form");
+const LogOutForm = document.querySelector(".log-out-form");
 const PostButton = document.querySelector(".post-button");
 const PostDiv = document.querySelector(".user-post");
 const Feed = document.querySelector(".feed");
@@ -17,7 +17,6 @@ const Loading = document.querySelector(".loading")
 LoadMorePostBtn.addEventListener("click", () => {
     fetch("/more-feed-posts").then(res => res.json()).then(data => {
         ConstructPage(data)
-        console.log(data)
     })
 })
 
@@ -27,7 +26,6 @@ PostButton.addEventListener("click", () => {
         shown_post_div = false;
     } else {
         fetch("/privilege").then(res => res.json()).then(data => {
-            console.log(data)
             if (data.privy === true) {
                 PostDiv.style.visibility = "initial";
                 shown_post_div = true;
@@ -36,19 +34,9 @@ PostButton.addEventListener("click", () => {
     }
 })
 
-// PostDivForm.addEventListener("submit", (event) => {
-//     event.preventDefault();
-//     let formData = new FormData(PostDivForm);
-//     formData.sub
-// })
-
-document.querySelector(".user-post form #post-file")
-    .addEventListener("change", (event) => {
-        }
-    )
-
 LogOutForm.addEventListener("submit", (event) => {
     event.preventDefault()
+    console.log("Logging out...")
     fetch("/rem-sesh").then(res => res.json()).then(logoutStatus => {
         if (logoutStatus) {
             LogOutForm.submit();
@@ -66,7 +54,6 @@ const LoadPosts = () => {
     fetch("/feed-posts").then(res => res.json()).then(data => {
         Feed.removeChild(Loading)
         ConstructPage(data)
-        // console.log(data);
     })
 }
 LoadPosts()
@@ -81,7 +68,6 @@ para.innerHTML += document.cookie.substring(document.cookie.indexOf("=") + 1, do
 //AND SETTING THEIR ATTRIBUTES AND IMAGE
 //LINKS
 const ConstructPage = (array) => {
-    console.log(array)
     array.map(post => {
         console.log(post)
         if (post.end) {
@@ -96,12 +82,76 @@ const ConstructPage = (array) => {
         PostHeading.innerText = post.caption;
         let PostImage = new Image()
         PostImage.src = "http://localhost:5000/users/" + post.username + post.link;
-        // console.log("url is " + url);
-        // "http://localhost:5000/users/" + post.username + "/posts" + post.link;
         PostCard.appendChild(PostImage);
         PostCard.appendChild(PostHeading);
-        // console.log("PostHeading appended to PostCard");
         Feed.appendChild(PostCard);
-        // console.log("PostCard added to feed");
     })
 }
+
+
+//FUNCTION THAT FETCHES USER DATA BASED ON SEARCH FOR USERS
+
+const SearchUserField = document.querySelector("#search-users")
+const SearchUserForm = document.querySelector(".search-user-form")
+SearchUserField.addEventListener("input", (event) => {
+    fetch("/user-search", {
+        method: 'POST',
+        body: new FormData(SearchUserForm),
+    }).then(res => {
+        console.log("Searching for users..." +
+            "Please wait...")
+        return res.json()
+    }).then(data => {
+        console.log("Are You Searching for: ")
+        console.log(data)
+        ConstructSearchArea(data)
+    })
+})
+
+
+const SearchDiv = document.querySelector(".fetched-users")
+const ConstructSearchArea = (array) => {
+    SearchDiv.innerHTML = ""
+    array.map(user => {
+        let nameSection = document.createElement("div")
+        let nameLabel = document.createElement("h6")
+        nameLabel.innerHTML = user.username
+        nameSection.id = user.username
+        nameSection.appendChild(nameLabel)
+        SearchDiv.appendChild(nameSection)
+    })
+}
+
+
+const ViewProfile = document.querySelector(".show-profile-info")
+const ProfileDiv = document.querySelector(".user-info")
+ViewProfile.addEventListener("click", () => {
+    if (ProfileDiv.style.visibility === "initial") {
+        ProfileDiv.style.visibility = "hidden";
+    } else {
+        ProfileDiv.style.visibility = "initial";
+    }
+})
+
+ProfileDiv.addEventListener("mouseout", () => {
+    // ProfileDiv.style.visibility = "hidden"
+})
+
+
+//CHATTING
+const ChatBtn = document.querySelector(".chat-access")
+const ChatScreen = document.querySelector(".chat-div")
+const CloseChatList = document.querySelector(".close-chat-list")
+const FeedPage = document.querySelector(".feed-page")
+const UserPost = document.querySelector(".user-post")
+ChatBtn.addEventListener("click", () => {
+    ChatScreen.style.visibility = "initial";
+    FeedPage.style.filter = "blur(3px) brightness(0.7)"
+    UserPost.style.filter = "blur(3px) brightness(0.7)"
+})
+
+CloseChatList.addEventListener("click", () => {
+    ChatScreen.style.visibility = "hidden";
+    FeedPage.style.filter = "initial"
+    UserPost.style.filter = "initial"
+})

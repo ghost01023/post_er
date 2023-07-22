@@ -3,7 +3,7 @@ const {usersPath} = require("./paths.js")
 
 const {PrivilegedUser} = require("./check_privilege.js")
 const {SortPostByLatest} = require("./try_sort")
-const MaxPosts = 3
+const MaxPosts = 10
 
 
 const GetFeedPosts = (req, res) => {
@@ -28,12 +28,10 @@ const GetFeedPosts = (req, res) => {
 
 const FirstFeedPosts = (email_username, feedObject, following) => {
     let {userPostDictionary, stablePostArray} = feedObject
-    console.log("StablePostArray AT Initial Fetch is ")
-    console.log(stablePostArray)
     const traversal = Object.keys(userPostDictionary).length
     let traversed = 0
     let selfDict = {}
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         following.map(user => {
             const endIn = userPostDictionary[user]["endIn"]
             const fetched = userPostDictionary[user]["fetched"]
@@ -48,7 +46,7 @@ const FirstFeedPosts = (email_username, feedObject, following) => {
                 // console.log("Fetched " + resolvedData[1] + ' posts for ' + user)
                 selfDict[user]["fetched"] = resolvedData[1]
                 selfDict[user]["endOfPosts"] = resolvedData[2]
-                // console.log("EndofPosts for " + user + " is " + resolvedData[2])
+                // console.log("EndOfPosts for " + user + " is " + resolvedData[2])
                 // selfDict[user]["endIn"] =
                 traversed++
                 //IF ALL FOLLOWED USERS' POST HAVE BEEN FETCHED...
@@ -66,12 +64,9 @@ const FirstFeedPosts = (email_username, feedObject, following) => {
 
 
 const EqualizeFeedJson = (email_username, stablePostArray, userSelfDict) => {
-    console.log()
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         fs.readFile((usersPath + email_username + "/feed/feed.json"), (err, data) => {
             let dataJson = JSON.parse(data.toString())
-            // console.log("Here's what we will write changes to: ")
-            // console.log(dataJson)
             for (let user in dataJson["userPostDictionary"]) {
                 if (!userSelfDict[user]) {
                     delete dataJson["userPostDictionary"][user]
@@ -80,7 +75,6 @@ const EqualizeFeedJson = (email_username, stablePostArray, userSelfDict) => {
                 }
             }
             dataJson["firstAccess"] = false
-            // console.log("to be written will be: ")
             let oneBigArray = []
             Object.keys(stablePostArray).map(user => {
                 oneBigArray = oneBigArray.concat(stablePostArray[user])
@@ -128,8 +122,6 @@ const EqualizeFeedJson = (email_username, stablePostArray, userSelfDict) => {
                     console.log("Final write error.")
                 } else {
                     resolve(userPosts)
-                    console.log("After Resolution of feed.json, dataJson is")
-                    console.log(dataJson)
                 }
             })
         })
@@ -142,7 +134,7 @@ const MoreFeedPosts = (req, res) => {
     let bigArray = []
     let userPosts = []
     PrivilegedUser(req).then((privy) => {
-        if (privy) return new Promise((resolve, reject) => {
+        if (privy) return new Promise((resolve) => {
             fs.readFile(usersPath + email_username + "/feed/feed.json", (err, data) => {
                 resolve(JSON.parse(data.toString()))
             })
@@ -151,8 +143,6 @@ const MoreFeedPosts = (req, res) => {
             res.send({access: "denied"})
         }
     }).then(feedObject => {
-        console.log("In loadMoreFeedPosts Function, the feedObject is...")
-        console.log(feedObject)
         let {accessedUsers, userPostDictionary, stablePostArray, endOfFeed} = feedObject;
         let traversal = 0;
         for (let user in userPostDictionary) {
@@ -160,18 +150,15 @@ const MoreFeedPosts = (req, res) => {
                 traversal++
             }
         }
-        console.log("traversal is to be " + traversal)
         //SAVE CHANGES TO
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             let traversed = 0;
             if (traversal === 0 && endOfFeed) {
-                console.log("End of feed now. Calculating response based on final posts...")
                 for (let user in stablePostArray) {
                     bigArray = bigArray.concat(stablePostArray[user])
                     stablePostArray[user] = []
                 }
                 if (bigArray.length > 0) {
-                    console.log(bigArray.length + " of posts are here to send in finality")
                     bigArray = SortPostByLatest(bigArray)
                     if (bigArray.length > MaxPosts) {
                         userPosts = bigArray.slice(0, MaxPosts)
@@ -188,11 +175,7 @@ const MoreFeedPosts = (req, res) => {
                             stablePostArray[post.username].push(post)
                         }
                     })
-                    console.log("newly made stable post array is ")
-                    console.log(stablePostArray)
                     feedObject["stablePostArray"] = stablePostArray
-                    console.log("Now we will write ")
-                    console.log(feedObject)
                     fs.writeFile((usersPath + email_username + "/feed/feed.json"), JSON.stringify(feedObject), (err) => {
                         if (err) {
                             console.log("Final feed.json New Write Error")
@@ -275,27 +258,21 @@ const MoreFeedPosts = (req, res) => {
 
 const InitUserPostDict = (username, following) => {
     return new Promise((resolve, reject) => {
-        fs.readFile((usersPath + username + "/feed/feed.json"), (err, data) => {
+        let dataJson = {
+            userPostDictionary: {}, stablePostArray: {}, firstAccess: false, accessedUsers: [], endOfFeed: true,
+        };
+        following.map((user) => {
+            dataJson["userPostDictionary"][user] = {
+                fetched: 0, endIn: MaxPosts, endOfPosts: false,
+            };
+            dataJson["stablePostArray"][user] = [];
+        })
+        fs.writeFile((usersPath + username + "/feed/feed.json"), JSON.stringify(dataJson), (err) => {
             if (err) {
-                console.log("Couldn't read User Feed Json to set post dictionary")
+                reject()
+                console.log("Couldn't InitUserPostDict up.")
             } else {
-                let dataJson = {
-                    userPostDictionary: {}, stablePostArray: {}, firstAccess: false, accessedUsers: [], endOfFeed: true,
-                };
-                following.map((user) => {
-                    dataJson["userPostDictionary"][user] = {
-                        fetched: 0, endIn: MaxPosts, endOfPosts: false,
-                    };
-                    dataJson["stablePostArray"][user] = [];
-                })
-                fs.writeFile((usersPath + username + "/feed/feed.json"), JSON.stringify(dataJson), (err) => {
-                    if (err) {
-                        reject()
-                        console.log("Couldn't InitUserPostDict up.")
-                    } else {
-                        resolve(dataJson)
-                    }
-                })
+                resolve(dataJson)
             }
         })
     })
@@ -303,7 +280,7 @@ const InitUserPostDict = (username, following) => {
 
 
 const ReadFollowers = (username) => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         fs.readFile((usersPath + username + "/preferences/following.json"), (err, data) => {
             if (err) {
                 console.log("Fail before begin")
