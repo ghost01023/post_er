@@ -177,7 +177,7 @@ app.post("/register", (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
     const email = req.body.email;
-    AddUser(username, email, password, res)
+    AddUser(username.toLowerCase(), email, password, res)
 })
 
 app.post("/authenticate", upload.none(), AuthenticateUser)
@@ -205,7 +205,7 @@ app.get("/privilege", (req, res) => {
 
 //WILL DELETE USER COOKIE SESSION DATA FROM JSON
 //ALSO NEED TO ENABLE COOKIE CROSS CHECK IN THE FIRST PLACE
-app.get("/rem-sesh", (req, res) => {
+app.get("/finish-session", (req, res) => {
     // console.log(req);
     console.log("Logout Post Method Called!")
     // console.log(req.body)
@@ -227,25 +227,37 @@ app.get("/chats", (req, res) => {
         if (privy) {
             fs.readFile((usersPath + username + "/chat/chat_list.json"), (err, data) => {
                 if (err) {
-                    console.log("Couldn't open chat_list.json for commie")
+                    console.log("Couldn't open chat_list.json for " + username)
                 } else {
                     let dataJson = JSON.parse(data.toString())
-                    const totalChats = dataJson.length
-                    let chats = {}
-                    for (let i = 0; i < totalChats; i++) {
-                        FetchChat(username, dataJson[i]).then(data => {
-                            chats[dataJson[i]] = data
-                            if (totalChats === i + 1) {
-                                res.send(chats)
-                            }
-                        })
-                    }
+                    res.send(dataJson)
+                    // let chats = {}
+                    // for (let i = 0; i < totalChats; i++) {
+                    //     FetchChat(username, dataJson[i]).then(data => {
+                    //         chats[dataJson[i]] = data
+                    //         if (totalChats === i + 1) {
+                    //             res.send(chats)
+                    //         }
+                    //     })
+                    // }
                 }
             })
         }
     })
 })
 
+
+app.get("/chat/*", (req, res) => {
+    const username = req.cookies.user
+    const other = req.url.slice(req.url.lastIndexOf("/") + 1, req.url.length)
+    PrivilegedUser(req).then(privy => {
+        if (privy) {
+            FetchChat(username, other).then(chat => {
+                res.send(chat)
+            })
+        }
+    })
+})
 
 app.post("/logout", (req, res) => {
     res.redirect("/")
@@ -380,7 +392,11 @@ const calculateImageUrl = (req) => {
 
 
 app.get("/users/*/profile.jpg", (req, res) => {
-    res.sendFile((usersPath + req.cookies.user + "/preferences/profile.jpg"))
+    let name = ""
+    for (let i = req.url.lastIndexOf("/") - 1; req.url[i] !== "/"; i--) {
+        name = req.url[i] + name
+    }
+    res.sendFile((usersPath + name + "/preferences/profile.jpg"))
 })
 
 //CATCH-ALL ROUTE(s)
@@ -389,36 +405,76 @@ app.get("/users/*/profile.jpg", (req, res) => {
 // })
 
 app.get("/users/*", (req, res) => {
-    console.log("Searched for user profile")
-    const username = req.url.substring(req.url.lastIndexOf("/") + 1, req.url.length)
-    fs.readFile((usersPath + username + "/posts/posts.json"), (err, data) => {
-        if (!err) {
-            // res.send("You searched for " + username + " who exists")
-            fs.readFile(__dirname + "/public/users/user.js", (err, data) => {
-                let str = data.toString()
-                // str = str.replace("missing_user_to_fetch", username)
-                fs.writeFile(__dirname + "/public/users/user.js", str, (err) => {
-                    if (err) {
-                        console.log("Failure while writing const username to js file")
-                    } else {
-                        console.log("Sending user profile files...")
-                        app.use(express.static(__dirname + "/public/users"))
-                        res.sendFile(__dirname + "/public/users/user.html")
-                    }
-                })
-            })
-        }
+    // const username = req.url.substring(req.url.lastIndexOf("/") + 1, req.url.length)
+    app.use(express.static(__dirname + "/public/users"))
+    res.sendFile(__dirname + "/public/users/user.html")
+    // fs.readFile((usersPath + username + "/posts/posts.json"), (err, data) => {
+    //     if (!err) {
+    //         // res.send("You searched for " + username + " who exists")
+    //         fs.readFile(__dirname + "/public/users/user.js", (err, data) => {
+    //             let str = data.toString()
+    //             str = str.replace("commie", username)
+    //             console.log("Replaces commie with commie")
+    //             fs.writeFile(__dirname + "/public/users/user.js", str, (err) => {
+    //                 console.log("Writing to file...")
+    //                 if (err) {
+    //                     console.log("Failure while writing const username to js file")
+    //                 } else {
+    //                     console.log("Sending user profile files...")
+    //
+    //                 }
+    //             })
+    //         })
+    //     }
         // else if (err.code === "ENOENT") {
         //     res.send("That User Does Not Exist")
         // }
-    })
+    // })
 })
 
 
 app.get("/user_details/*", (req, res) => {
-    const user = req.url.substring(req.url.lastIndexOf("/"), -1)
-    res.send("You searched for " + user)
+    const user = req.url.substring((req.url.lastIndexOf("/") + 1), (req.url.length))
+    // res.send({mess: "You searched for " + user})
+    fs.readFile((usersPath + user + "/preferences/profile_details.json"), (err, data) => {
+        if (err) {
+            console.log("Couldn't read profile_details.json of " + user)
+            res.send({
+                statusCode: 404
+            })
+        } else {
+            let dataJson = JSON.parse(data.toString());
+            fs.readFile((usersPath + user + "/preferences/followers.json"), (err, data) => {
+                let following = JSON.parse(data.toString());
+                dataJson["follow"] = following.includes(req.cookies.user);
+                console.log("this person following " + user + " is " + dataJson['follow'])
+                res.send(dataJson)
+            })
+        }
+    })
 })
+
+
+app.get("/posts/*", (req, res) => {
+    console.log("Made proper nav request")
+    const user = req.url.substring(req.url.lastIndexOf("/") + 1, req.url.length)
+    // res.send({"posts are": "here"})
+    fs.readFile((usersPath + user + "/posts/posts.json"), (err, data) => {
+        if (err) {
+            console.log("Failed in all-post json read method")
+        } else {
+            res.send(JSON.parse(data.toString()))
+        }
+    })
+})
+
+const { FollowUser, UnFollowUser } = require("./funcs/follow")
+
+
+app.post("/follow-user", upload.none(), FollowUser)
+
+
+app.post("/unfollow-user", upload.none(), UnFollowUser)
 
 module.exports = {database, usersPath}
 

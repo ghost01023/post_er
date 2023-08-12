@@ -46,6 +46,7 @@ async function createUserFolder(name) {
     let postImageDirViable = true
     let feedDirViable = true
     let feedJsonViable = true
+    let profDetailsViable = true
     fs.mkdirSync(path.join(usersPath + name), (err) => {
         if (err) {
             console.log(err);
@@ -123,7 +124,7 @@ async function createUserPreference(name) {
         fs.rmdirSync(path.join(usersPath + name))
         return
     }
-    fs.appendFileSync((usersPath + name + "/preferences/profile_details.json"), "[]", err => {
+    fs.appendFileSync((usersPath + name + "/preferences/profile_details.json"), '{"bio": "", "followers": 0, "following": 0, "total_posts": 0}', err => {
         if (err) {
             profDetailsViable = false
             console.log(err)

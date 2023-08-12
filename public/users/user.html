@@ -3,24 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <title>User</title>
-    <link rel=stylesheet href="user.css">
+    <link rel=stylesheet href="/user.css">
 </head>
 <body>
 <div>
     <h1 class="user-name">
         USERNAME
     </h1>
-    <img class="user-image" alt="user-profile" src="http://localhost:5000/users/commie/profile.jpg">
-    <h3> Bio of user</h3>
+    <img class="user-image" alt="user-profile" src="">
+    <h3 class="user-bio"> Bio of user</h3>
 </div>
-<div>
+<div class="stats">
     <h4>Followers</h4>
     <h4>Following</h4>
     <h4>Posts</h4>
+    <h4 class="user-followers">Followers</h4>
+    <h4 class="user-following">Following</h4>
+    <h4 class="user-posts">Posts</h4>
 </div>
-<div>
+<form class="follow-user-form" method="POST" action="/follow-user">
+    <button type="submit">FOLLOW class=follow-user-form</button>
+</form>
+<div class="all-posts">
     HERE WILL BE POST THUMBNAILS IN GRID FORMATION
 </div>
 </body>
-<script src="user.js"></script>
+<script src="/user.js"></script>
 </html>
