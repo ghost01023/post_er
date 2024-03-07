@@ -1,182 +1,213 @@
-.feed-page {
-    display: grid;
-    grid-template-columns: 2fr 6fr 2fr;
-    transition: filter 0.2s ease-in-out;
-}
-
-/*.top-bar {*/
+/*.feed-page {*/
 /*    display: grid;*/
-/*    grid-template-columns: 4fr 1fr;*/
+/*    grid-template-columns: 2fr 6fr 2fr;*/
+/*    transition: filter 0.2s ease-in-out;*/
 /*}*/
 
-.close-chat-list:hover {
-    cursor: default;
-}
+/*#search-users {*/
+/*    border: 3px solid black;*/
+/*    border-radius: 0.5rem;*/
+/*    padding: 0.2rem;*/
+/*    font-size: 1rem;*/
+/*    background-color: transparent;*/
+/*}*/
 
-.search-users {
-    position: fixed;
-    top: 5%;
+/*.close-chat-list:hover {*/
+/*    cursor: default;*/
+/*}*/
+
+/*.search-users {*/
+/*    position: fixed;*/
+/*    top: 5%;*/
+/*    display: grid;*/
+/*    grid-template-rows: 3fr 12fr 2fr;*/
+/*}*/
+
+/*.chat-access {*/
+/*    font-size: 2rem;*/
+/*    padding: 0.6rem 1rem;*/
+/*    border: 2px solid black;*/
+/*    border-radius: 0.125rem;*/
+/*    box-shadow: 3px 2px grey;*/
+/*    transition: all 0.2s ease-in-out;*/
+/*}*/
+
+/*.chat-access:hover {*/
+/*    box-shadow: 2px 1px grey;*/
+/*}*/
+
+/*.chat-access:active {*/
+/*    box-shadow: 1px 0 grey;*/
+/*}*/
+
+/*.chat-div {*/
+/*    position: fixed;*/
+/*    z-index: 1000;*/
+/*    top: 5%;*/
+/*    left: 20%;*/
+/*    visibility: hidden*/
+/*}*/
+
+/*.close-chat-list {*/
+/*    padding: 0.5rem;*/
+/*    background-color: white;*/
+/*}*/
+
+/*.fetched-users {*/
+/*    font-size: 1.5rem;*/
+/*}*/
+
+/*.search-user-form {*/
+/*    font-family: "Instagram Sans", sans-serif;*/
+/*}*/
+
+/*#search-users {*/
+/*    font-size: 1.5rem;*/
+/*}*/
+
+/*.search-user-form input {*/
+/*    box-sizing: border-box;*/
+/*}*/
+
+/*.show-profile-info {*/
+/*    border-radius: 1.25rem;*/
+/*    background-image: url("http://localhost:5000/users/eleanor/images/dsLwZpQwnPQxSvLflXxeixAtgNcLkiuvKjEilOTrBxOxtNOgPu.png");*/
+/*    width: 3rem;*/
+/*    height: 3rem;*/
+/*}*/
+
+/*.user-info {*/
+/*    display: grid;*/
+/*    visibility: hidden;*/
+/*    position: fixed;*/
+/*    top: 20%;*/
+/*    right: 0;*/
+/*}*/
+
+/*.feed {*/
+/*    display: flex;*/
+/*    flex-flow: wrap row;*/
+/*    border: 1px solid purple;*/
+/*    !*padding: 0.5rem 1rem;*!*/
+/*    text-align: center;*/
+/*    font-family: "Instagram Sans", sans-serif;*/
+/*    justify-content: center;*/
+/*    align-items: flex-start;*/
+/*    margin-right: auto;*/
+/*    margin-left: auto;*/
+/*    margin-top: 6rem;*/
+/*}*/
+
+/*.feed-greeting {*/
+/*    margin-right: auto;*/
+/*    margin-left: auto;*/
+/*}*/
+
+/*.post-card {*/
+/*    background-color: #F8F3D4;*/
+/*    padding: 1rem 1.5rem;*/
+/*    box-sizing: border-box;*/
+/*    width: 100%;*/
+/*}*/
+
+/*.post-card img {*/
+/*    width: 85%;*/
+/*}*/
+
+/*.user-post {*/
+/*    visibility: hidden;*/
+/*    display: flex;*/
+/*    flex-flow: wrap row;*/
+/*    width: 100%;*/
+/*    position: fixed;*/
+/*    bottom: 7rem;*/
+/*}*/
+
+/*.user-post form {*/
+/*    margin-left: auto;*/
+/*    margin-right: auto;*/
+/*}*/
+
+/*.post-not-privy {*/
+/*    visibility: hidden;*/
+/*}*/
+
+/*.post-div {*/
+/*    display: flex;*/
+/*    flex-flow: wrap row;*/
+/*    justify-content: center;*/
+/*    align-items: center;*/
+/*    position: fixed;*/
+/*    width: 100%;*/
+/*}*/
+
+
+/*.post-div {*/
+/*    bottom: 1rem;*/
+/*}*/
+/*.log-out-div {*/
+/*    display: inline;*/
+/*    top: 1rem;*/
+/*    box-sizing: content-box;*/
+/*    right: 2rem;*/
+/*}*/
+
+/*.log-out-div form {*/
+/*    display: inline;*/
+/*}*/
+
+/*.post-button, .log-out {*/
+/*    border: 1px solid black;*/
+/*    border-radius: 0.125rem;*/
+/*    font-family: "Brandon Grotesque Light", sans-serif;*/
+/*    font-size: 2rem;*/
+/*    padding: 0.5rem 1rem;*/
+/*    !*background-color: darkslategrey;*!*/
+/*    color: white;*/
+/*    transition: all 0.3s ease-in-out;*/
+/*}*/
+
+/*.post-button:hover, .log-out:hover {*/
+/*    padding: 0.5rem 1.3rem;*/
+/*    !*color: antiquewhite;*!*/
+/*    border-radius: 0.2rem;*/
+/*}*/
+
+/*.post-button {*/
+/*    background-color: wheat;*/
+/*    color: black;*/
+/*    background-image: url("/icons/plus.svg");*/
+/*}*/
+
+/*.log-out {*/
+/*    background-color: orangered;*/
+/*    color: white;*/
+/*}*/
+
+.feed-page {
     display: grid;
-    grid-template-rows: 3fr 12fr 2fr;
+    grid-template-columns: 2fr 4fr 1fr;
 }
 
-.chat-access {
-    font-size: 2rem;
-    padding: 0.6rem 1rem;
-    border: 2px solid black;
-    border-radius: 0.125rem;
-    box-shadow: 3px 2px grey;
-    transition: all 0.2s ease-in-out;
-}
 
-.chat-access:hover {
-    box-shadow: 2px 1px grey;
-}
-
-.chat-access:active {
-    box-shadow: 1px 0 grey;
-}
-
-.chat-div {
-    position: fixed;
-    z-index: 1000;
-    top: 5%;
-    left: 20%;
-    visibility: hidden
-}
-
-.close-chat-list {
-    padding: 0.5rem;
-    background-color: white;
-}
-
-.fetched-users {
-    font-size: 1.5rem;
-}
-
-.search-user-form {
-    font-family: "Instagram Sans", sans-serif;
-}
-
-#search-users {
-    font-size: 1.5rem;
-}
-
-.search-user-form input {
-    box-sizing: border-box;
-}
-
-.show-profile-info {
-    border-radius: 1.25rem;
-    background-image: url("http://localhost:5000/users/eleanor/images/dsLwZpQwnPQxSvLflXxeixAtgNcLkiuvKjEilOTrBxOxtNOgPu.png");
-    width: 3rem;
-    height: 3rem;
-}
-
-.user-info {
-    display: grid;
-    visibility: hidden;
-    position: fixed;
-    top: 20%;
-    right: 0;
-}
-
-.feed {
+.top-bar {
     display: flex;
-    flex-flow: wrap row;
-    border: 1px solid purple;
-    /*padding: 0.5rem 1rem;*/
-    text-align: center;
-    font-family: "Instagram Sans", sans-serif;
-    justify-content: center;
-    align-items: flex-start;
-    margin-right: auto;
-    margin-left: auto;
-    margin-top: 6rem;
-}
-
-.feed-greeting {
-    margin-right: auto;
-    margin-left: auto;
-}
-
-.post-card {
-    background-color: #F8F3D4;
-    padding: 1rem 1.5rem;
-    box-sizing: border-box;
-    width: 100%;
-}
-
-.post-card img {
-    width: 85%;
-}
-
-.user-post {
-    visibility: hidden;
-    display: flex;
-    flex-flow: wrap row;
-    width: 100%;
-    position: fixed;
-    bottom: 7rem;
-}
-
-.user-post form {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.post-not-privy {
-    visibility: hidden;
-}
-
-.post-div {
-    display: flex;
-    flex-flow: wrap row;
-    justify-content: center;
+    flex-flow: wrap column;
+    justify-content: space-between;
     align-items: center;
     position: fixed;
-    width: 100%;
 }
 
-
-.post-div {
+.chat {
+    position: fixed;
     bottom: 1rem;
 }
-.log-out-div {
-    display: inline;
-    top: 1rem;
-    box-sizing: content-box;
-    right: 2rem;
-}
 
-.log-out-div form {
-    display: inline;
-}
 
-.post-button, .log-out {
-    border: 1px solid black;
-    border-radius: 0.125rem;
-    font-family: "Brandon Grotesque Light", sans-serif;
-    font-size: 2rem;
-    padding: 0.5rem 1rem;
-    /*background-color: darkslategrey;*/
-    color: white;
-    transition: all 0.3s ease-in-out;
-}
-
-.post-button:hover, .log-out:hover {
-    padding: 0.5rem 1.3rem;
-    /*color: antiquewhite;*/
-    border-radius: 0.2rem;
-}
-
-.post-button {
-    background-color: wheat;
-    color: black;
-    background-image: url("/icons/plus.svg");
-}
-
-.log-out {
-    background-color: orangered;
-    color: white;
+#search-users {
+    border: 3px solid black;
+    border-radius: 0.5rem;
+    padding: 0.2rem;
+    font-size: 1rem;
+    background-color: transparent;
 }

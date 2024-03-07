@@ -58,9 +58,8 @@ const LoadPosts = () => {
 }
 LoadPosts()
 
-let para = document.querySelector("h2");
-
-para.innerHTML += document.cookie.substring(document.cookie.indexOf("=") + 1, document.cookie.indexOf(";"))
+let UserGreeting = document.querySelector(".feed-greeting");
+UserGreeting.innerHTML += document.cookie.substring(document.cookie.indexOf("=") + 1, document.cookie.indexOf(";"))
 
 //FUNCTION TO PARSE RECEIVED JSON OF POST DATA
 
@@ -92,6 +91,11 @@ const ConstructPage = (array) => {
 //FUNCTION THAT FETCHES USER DATA BASED ON SEARCH FOR USERS
 
 const SearchUserField = document.querySelector("#search-users")
+document.addEventListener("keydown", (event) => {
+    if (event.key === "/") {
+        SearchUserField.focus();
+    }
+})
 const SearchUserForm = document.querySelector(".search-user-form")
 SearchUserField.addEventListener("input", (event) => {
     fetch("/user-search", {
@@ -141,7 +145,7 @@ ProfileDiv.addEventListener("mouseout", () => {
 
 
 //CHATTING
-const ChatBtn = document.querySelector(".chat-access")
+const ChatBtn = document.querySelector(".chat-access-button")
 const ChatScreen = document.querySelector(".chat-div")
 const ChatList = document.querySelector(".chat-list")
 const CloseChatList = document.querySelector(".close-chat-list")
